@@ -6,6 +6,7 @@ com\muragame\pos\model\IPrintable.class
 com\muragame\pos\model\payment\Payment.class
 com\muragame\pos\model\payment\QrisPayment.class
 com\muragame\pos\model\QrisPayment.class
+com\muragame\pos\database\DatabaseConnection.class
 com\muragame\pos\model\Layanan.class
 com\muragame\pos\model\payment\CashPayment.class
 com\muragame\pos\model\Category.class

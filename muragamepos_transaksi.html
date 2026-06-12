@@ -33,7 +33,15 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#f0eee5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh;}
+body{background:#f0eee5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; overflow:hidden;}
+
+/* === Custom Element Display Fix === */
+/* Web Components default ke display:inline, harus di-override agar CSS grid bekerja */
+sidebar-kiri { display:flex; flex-direction:column; grid-row:1/3; }
+menu-section { display:block; overflow:hidden; min-height:0; }
+detail-pesanan { display:flex; flex-direction:column; grid-row:1/3; }
+popup-kustomisasi, popup-pembayaran { display:block; }
+
 .app{display:grid;grid-template-columns:180px 1fr 270px;grid-template-rows:auto 1fr;width:1024px;height:700px;background:var(--color-background-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;border:0.5px solid var(--color-border-tertiary);font-size:13px;color:var(--color-text-primary)}
 .sidebar{grid-row:1/3;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;overflow:hidden}
 .sb-logo{padding:14px 14px 12px;border-bottom:0.5px solid var(--color-border-tertiary)}
@@ -55,7 +63,7 @@ body{background:#f0eee5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI"
 .avatar{width:28px;height:28px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--color-text-info);flex-shrink:0}
 .kasir-name{font-size:12px;font-weight:500}
 .kasir-shift{font-size:10px;color:var(--color-text-secondary)}
-.main{overflow-y:auto;padding:14px}
+.main{overflow-y:auto;padding:14px;min-height:0;height:100%}
 .tabs{display:flex;gap:0;margin-bottom:14px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:3px;width:fit-content}
 .tab{padding:5px 14px;font-size:11px;border-radius:6px;cursor:pointer;color:var(--color-text-secondary);transition:all .12s;white-space:nowrap}
 .tab.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;border:0.5px solid var(--color-border-tertiary)}
@@ -84,7 +92,7 @@ body{background:#f0eee5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI"
 .cust-av{width:26px;height:26px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--color-text-success);flex-shrink:0}
 .cust-name{font-size:12px;font-weight:500}
 .cust-type{font-size:10px;color:var(--color-text-success)}
-.cart-items{flex:1;overflow-y:auto;padding:8px 14px}
+.cart-items{flex:1;overflow-y:auto;padding:8px 14px;min-height:0}
 .ci{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
 .ci:last-child{border-bottom:none}
 .ci-info{flex:1;min-width:0}
@@ -97,7 +105,7 @@ body{background:#f0eee5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI"
 .ci-price{font-size:12px;font-weight:500;flex-shrink:0}
 .cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:var(--color-text-tertiary)}
 .cart-empty svg{opacity:.3}
-.cart-footer{padding:12px 14px;border-top:0.5px solid var(--color-border-tertiary)}
+.cart-footer{padding:12px 14px;border-top:0.5px solid var(--color-border-tertiary);flex-shrink:0}
 .calc{display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
 .calc.disc{color:var(--color-text-success)}
 .calc.total{font-size:13px;font-weight:600;color:var(--color-text-primary);margin-top:8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)}
@@ -110,7 +118,7 @@ body{background:#f0eee5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI"
 .modal {
   display: none; 
   position: fixed; 
-  z-index: 100; 
+  z-index: 9999; 
   left: 0; 
   top: 0; 
   width: 100%; 
@@ -127,6 +135,8 @@ body{background:#f0eee5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI"
   padding: 22px; 
   border-radius: var(--border-radius-lg); 
   width: 380px; 
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0,0,0,0.12);
   color: var(--color-text-primary);
   animation: modalFadeIn 0.15s ease-out;
@@ -179,9 +189,30 @@ body{background:#f0eee5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI"
   padding: 24px; 
   border-radius: 8px; 
   width: 340px; 
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0,0,0,0.25); 
   font-family: 'Courier New', Courier, monospace;
   animation: modalFadeIn 0.15s ease-out;
+}
+
+/* Close button styling */
+.close-btn {
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--color-text-secondary);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+.close-btn:hover {
+  background: var(--color-background-tertiary);
+  color: var(--color-text-primary);
 }
 
 /* History table */
@@ -929,6 +960,46 @@ function logout() {
     window.close();
   }
 }
+
+// === Click-outside-to-close untuk semua modal ===
+document.addEventListener('click', function(e) {
+  // Kustomisasi modal
+  var custModal = document.getElementById('customizationModal');
+  if (custModal && custModal.style.display === 'flex' && e.target === custModal) {
+    closeCustomizationModal();
+  }
+  // Payment modal
+  var payModal = document.getElementById('paymentModal');
+  if (payModal && payModal.style.display === 'flex' && e.target === payModal) {
+    closePaymentModal();
+  }
+  // Receipt modal
+  var rcptModal = document.getElementById('receiptModal');
+  if (rcptModal && rcptModal.style.display === 'flex' && e.target === rcptModal) {
+    closeReceiptModal();
+  }
+});
+
+// === ESC key untuk tutup modal ===
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var custModal = document.getElementById('customizationModal');
+    if (custModal && custModal.style.display === 'flex') {
+      closeCustomizationModal();
+      return;
+    }
+    var payModal = document.getElementById('paymentModal');
+    if (payModal && payModal.style.display === 'flex') {
+      closePaymentModal();
+      return;
+    }
+    var rcptModal = document.getElementById('receiptModal');
+    if (rcptModal && rcptModal.style.display === 'flex') {
+      closeReceiptModal();
+      return;
+    }
+  }
+});
 </script>
 </body>
 </html>

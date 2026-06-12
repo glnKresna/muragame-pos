@@ -302,6 +302,15 @@ public class JavaBridge {
         System.exit(0);
     }
 
+    /**
+     * Mengambil riwayat transaksi dari database MySQL berdasarkan filter waktu.
+     * @param filter "today", "week", "month", "year", "all"
+     * @return JSON array string
+     */
+    public String getHistoryFromDB(String filter) {
+        return transactionRepository.getHistoryFromDB(filter);
+    }
+
     private String escapeJson(String s) {
         if (s == null) return "";
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
