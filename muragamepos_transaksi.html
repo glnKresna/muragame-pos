@@ -261,6 +261,38 @@ popup-kustomisasi, popup-pembayaran { display:block; }
 
 </div>
 
+<!-- MODAL KELOLA MENU (inlined) -->
+<div id="menuModal" class="modal" style="display:none;">
+  <div class="modal-content" style="width: 360px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:0.5px solid var(--color-border-tertiary); padding-bottom:10px;">
+      <h3 id="menuModalTitle" style="font-size:13px; font-weight:600;">Tambah Menu Baru</h3>
+      <span class="close-btn" onclick="closeMenuModal()" style="cursor:pointer; font-size:18px; color:var(--color-text-secondary);">&times;</span>
+    </div>
+    <input type="hidden" id="menuActionType" value="add">
+    <div style="margin-bottom:12px;">
+      <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">ID Menu</label>
+      <input type="text" id="menuIdInput" placeholder="Contoh: M018" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:12px;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">Nama Menu</label>
+      <input type="text" id="menuNameInput" placeholder="Contoh: Spicy Ramen" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:12px;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">Kategori</label>
+      <select id="menuCatInput" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:12px;">
+        <option value="ramen">Ramen</option>
+        <option value="minuman">Minuman</option>
+        <option value="snack">Snack</option>
+      </select>
+    </div>
+    <div style="margin-bottom:15px;">
+      <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">Harga (Rp)</label>
+      <input type="number" id="menuPriceInput" placeholder="Contoh: 35000" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:12px;">
+    </div>
+    <button class="pay-btn" style="margin-top:5px;" onclick="saveMenu()">Simpan Menu</button>
+  </div>
+</div>
+
 <popup-kustomisasi></popup-kustomisasi>
 <popup-pembayaran></popup-pembayaran>
 
@@ -280,9 +312,9 @@ var pastTransactionsList = [];
 var mockCart = [];
 var mockSvcName = "Dine In";
 var mockSvcPrice = 5000;
-var mockCustomerName = "Budi Santoso";
-var mockCustomerType = "Member · diskon 10%";
-var mockDiscountRate = 0.10;
+var mockCustomerName = "Umum";
+var mockCustomerType = "Regular Customer";
+var mockDiscountRate = 0.00;
 var mockHistory = [];
 
 var isInitialized = false;
@@ -385,6 +417,11 @@ function syncWithJava() {
   
   var summaryRaw = window.javaApp.getOrderSummaryJson();
   var summary = JSON.parse(summaryRaw);
+  
+  document.getElementById('custNameLabel').textContent = summary.customerName;
+  document.getElementById('custTypeLabel').textContent = summary.customerType;
+  var av = summary.customerName ? summary.customerName.substring(0, 2).toUpperCase() : "UM";
+  document.getElementById('custAvLabel').textContent = av;
   
   document.getElementById('orderId').textContent = window.javaApp.getOrderId();
   
@@ -585,8 +622,10 @@ function switchView(view) {
     activeView = 'transaksi';
     document.getElementById('sbTransaksi').classList.add('active');
     document.getElementById('sbRiwayat').classList.remove('active');
+    document.getElementById('sbDataMenu').classList.remove('active');
     document.getElementById('sbTransaksi').querySelector('.sb-dot').style.backgroundColor = 'var(--color-text-info)';
     document.getElementById('sbRiwayat').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
+    document.getElementById('sbDataMenu').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
     
     if (menuSectionEl) {
       menuSectionEl.style.gridColumn = '2';
@@ -594,6 +633,8 @@ function switchView(view) {
       if (menuView) menuView.style.display = 'block';
       var histView = menuSectionEl.querySelector('#historyView');
       if (histView) histView.style.display = 'none';
+      var dataMenuView = menuSectionEl.querySelector('#dataMenuView');
+      if (dataMenuView) dataMenuView.style.display = 'none';
     }
     if (detailPesananEl) {
       detailPesananEl.style.display = 'flex';
@@ -602,8 +643,10 @@ function switchView(view) {
     activeView = 'riwayat';
     document.getElementById('sbTransaksi').classList.remove('active');
     document.getElementById('sbRiwayat').classList.add('active');
+    document.getElementById('sbDataMenu').classList.remove('active');
     document.getElementById('sbTransaksi').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
     document.getElementById('sbRiwayat').querySelector('.sb-dot').style.backgroundColor = 'var(--color-text-info)';
+    document.getElementById('sbDataMenu').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
     
     if (menuSectionEl) {
       menuSectionEl.style.gridColumn = '2 / 4';
@@ -611,12 +654,37 @@ function switchView(view) {
       if (menuView) menuView.style.display = 'none';
       var histView = menuSectionEl.querySelector('#historyView');
       if (histView) histView.style.display = 'block';
+      var dataMenuView = menuSectionEl.querySelector('#dataMenuView');
+      if (dataMenuView) dataMenuView.style.display = 'none';
     }
     if (detailPesananEl) {
       detailPesananEl.style.display = 'none';
     }
     
     renderHistory();
+  } else if (view === 'datamenu') {
+    activeView = 'datamenu';
+    document.getElementById('sbTransaksi').classList.remove('active');
+    document.getElementById('sbRiwayat').classList.remove('active');
+    document.getElementById('sbDataMenu').classList.add('active');
+    document.getElementById('sbTransaksi').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
+    document.getElementById('sbRiwayat').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
+    document.getElementById('sbDataMenu').querySelector('.sb-dot').style.backgroundColor = 'var(--color-text-info)';
+    
+    if (menuSectionEl) {
+      menuSectionEl.style.gridColumn = '2 / 4';
+      var menuView = menuSectionEl.querySelector('#menuViewSection');
+      if (menuView) menuView.style.display = 'none';
+      var histView = menuSectionEl.querySelector('#historyView');
+      if (histView) histView.style.display = 'none';
+      var dataMenuView = menuSectionEl.querySelector('#dataMenuView');
+      if (dataMenuView) dataMenuView.style.display = 'block';
+    }
+    if (detailPesananEl) {
+      detailPesananEl.style.display = 'none';
+    }
+    
+    renderDataMenuTable();
   }
 }
 
@@ -727,13 +795,37 @@ function confirmCustomization() {
   }
 }
 
+var originalTotalValue = 0;
+var discountedTotalValue = 0;
+
+function updatePaymentTotals() {
+  var discAmount = parseFloat(document.getElementById('manualDiscInput').value) || 0;
+  if (discAmount < 0) discAmount = 0;
+  
+  if (discAmount > originalTotalValue) {
+    discAmount = originalTotalValue;
+    document.getElementById('manualDiscInput').value = discAmount;
+  }
+  
+  discountedTotalValue = Math.max(0, originalTotalValue - discAmount);
+  document.getElementById('modalTotal').textContent = fmt(discountedTotalValue);
+  
+  calcChange();
+}
+
 function goPayment() {
-  document.getElementById('modalTotal').textContent = fmt(currentTotalValue);
+  originalTotalValue = currentTotalValue;
+  discountedTotalValue = currentTotalValue;
+  
+  document.getElementById('custNameInput').value = 'Umum';
+  document.getElementById('manualDiscInput').value = 0;
+  
   document.getElementById('cashAmount').value = '';
   document.getElementById('cashChange').textContent = 'Rp 0';
   document.getElementById('confirmPayBtn').disabled = activePayMethod === 'CASH';
   
   selectPayMethod('CASH');
+  updatePaymentTotals();
   
   document.getElementById('paymentModal').style.display = 'flex';
 }
@@ -762,7 +854,7 @@ function selectPayMethod(method) {
 function setQuickCash(val) {
   var cashInput = document.getElementById('cashAmount');
   if (val === 'pas') {
-    cashInput.value = currentTotalValue;
+    cashInput.value = discountedTotalValue;
   } else {
     cashInput.value = val;
   }
@@ -773,7 +865,7 @@ function calcChange() {
   if (activePayMethod !== 'CASH') return;
   
   var cashReceived = parseFloat(document.getElementById('cashAmount').value) || 0;
-  var change = cashReceived - currentTotalValue;
+  var change = cashReceived - discountedTotalValue;
   
   var changeEl = document.getElementById('cashChange');
   if (change < 0) {
@@ -788,17 +880,34 @@ function calcChange() {
 }
 
 function confirmPayment() {
+  var custName = document.getElementById('custNameInput').value.trim();
+  if (custName === "") {
+    alert("Nama pelanggan tidak boleh kosong!");
+    return;
+  }
+  
+  if (custName.split(/\s+/).length > 1) {
+    alert("Nama pelanggan hanya boleh satu kata saja!");
+    return;
+  }
+  
+  var discountAmount = parseFloat(document.getElementById('manualDiscInput').value) || 0;
+  if (discountAmount < 0) {
+    alert("Diskon tidak boleh negatif!");
+    return;
+  }
+  
   var cashReceived = 0;
   if (activePayMethod === 'CASH') {
     cashReceived = parseFloat(document.getElementById('cashAmount').value) || 0;
-    if (cashReceived < currentTotalValue) {
+    if (cashReceived < discountedTotalValue) {
       alert("Uang yang diterima kurang!");
       return;
     }
   }
   
   if (window.javaApp) {
-    var responseRaw = window.javaApp.processPayment(activePayMethod, cashReceived);
+    var responseRaw = window.javaApp.processPayment(activePayMethod, cashReceived, custName, discountAmount);
     var response = JSON.parse(responseRaw);
     
     if (response.success) {
@@ -813,9 +922,8 @@ function confirmPayment() {
     mockCart.forEach(function(item) {
       subtotal += item.price * item.qty;
     });
-    var discount = subtotal * mockDiscountRate;
-    var total = subtotal > 0 ? (subtotal + mockSvcPrice - discount) : 0;
-    if (subtotal <= 0) discount = 0;
+    var total = subtotal > 0 ? (subtotal + mockSvcPrice - discountAmount) : 0;
+    if (total < 0) total = 0;
     
     var change = activePayMethod === 'CASH' ? (cashReceived - total) : 0;
     
@@ -835,10 +943,10 @@ function confirmPayment() {
       success: true,
       orderId: orderId,
       date: dateStr,
-      customerName: mockCustomerName,
+      customerName: custName,
       subtotal: subtotal,
       service: mockSvcPrice,
-      discount: discount,
+      discount: discountAmount,
       total: total,
       method: activePayMethod,
       paid: activePayMethod === 'CASH' ? cashReceived : total,
@@ -849,11 +957,11 @@ function confirmPayment() {
     mockHistory.push({
       orderId: orderId,
       date: dateStr,
-      customerName: mockCustomerName,
+      customerName: custName,
       subtotal: subtotal,
       service: mockSvcPrice,
       serviceName: mockSvcName,
-      discount: discount,
+      discount: discountAmount,
       total: total,
       method: activePayMethod,
       paid: activePayMethod === 'CASH' ? cashReceived : total,
@@ -953,6 +1061,154 @@ function reprintStruk(index) {
   showReceipt(data);
 }
 
+function renderDataMenuTable() {
+  var tbody = document.getElementById('dataMenuTableBody');
+  tbody.innerHTML = '';
+  
+  if (menus.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; text-align:center; color:var(--color-text-tertiary);">Belum ada data menu</td></tr>';
+    return;
+  }
+  
+  menus.forEach(function(m) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td style="padding:10px 14px; font-weight:500;">' + m.id + '</td>' +
+                   '<td style="padding:10px 14px;">' + m.name + '</td>' +
+                   '<td style="padding:10px 14px; text-transform:capitalize;">' + m.cat + '</td>' +
+                   '<td style="padding:10px 14px; font-weight:600; color:var(--color-text-info);">' + fmt(m.price) + '</td>' +
+                   '<td style="padding:10px 14px; text-align:right; display:flex; gap:6px; justify-content:flex-end;">' +
+                     '<button class="quick-cash-btn" onclick="openMenuModal(\'edit\', \'' + m.id + '\')" style="padding:4px 8px;">Edit</button>' +
+                     '<button class="quick-cash-btn" onclick="deleteMenuAction(\'' + m.id + '\')" style="padding:4px 8px; color:var(--color-text-danger); border-color:var(--color-background-danger);">Hapus</button>' +
+                   '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function openMenuModal(action, id) {
+  document.getElementById('menuActionType').value = action;
+  
+  if (action === 'add') {
+    document.getElementById('menuModalTitle').textContent = 'Tambah Menu Baru';
+    document.getElementById('menuIdInput').value = '';
+    document.getElementById('menuIdInput').disabled = false;
+    document.getElementById('menuNameInput').value = '';
+    document.getElementById('menuCatInput').value = 'ramen';
+    document.getElementById('menuPriceInput').value = '';
+  } else {
+    document.getElementById('menuModalTitle').textContent = 'Edit Menu';
+    var m = menus.find(function(item){return item.id === id});
+    if (!m) return;
+    document.getElementById('menuIdInput').value = m.id;
+    document.getElementById('menuIdInput').disabled = true;
+    document.getElementById('menuNameInput').value = m.name;
+    document.getElementById('menuCatInput').value = m.cat;
+    document.getElementById('menuPriceInput').value = m.price;
+  }
+  
+  document.getElementById('menuModal').style.display = 'flex';
+}
+
+function closeMenuModal() {
+  document.getElementById('menuModal').style.display = 'none';
+}
+
+function saveMenu() {
+  var action = document.getElementById('menuActionType').value;
+  var id = document.getElementById('menuIdInput').value.trim();
+  var name = document.getElementById('menuNameInput').value.trim();
+  var cat = document.getElementById('menuCatInput').value;
+  var price = parseFloat(document.getElementById('menuPriceInput').value) || 0;
+  
+  if (id === "" || name === "" || price <= 0) {
+    alert("Semua field harus diisi dengan benar!");
+    return;
+  }
+  
+  if (action === 'add') {
+    if (window.javaApp) {
+      var resRaw = window.javaApp.addMenu(id, name, price, cat);
+      var res = JSON.parse(resRaw);
+      if (res.success) {
+        var menusRaw = window.javaApp.getMenusJson();
+        menus = JSON.parse(menusRaw);
+        renderMenus();
+        renderDataMenuTable();
+        closeMenuModal();
+      } else {
+        alert(res.message);
+      }
+    } else {
+      if (menus.some(function(m){return m.id.toLowerCase() === id.toLowerCase()})) {
+        alert("ID Menu sudah digunakan!");
+        return;
+      }
+      var tagClass = cat === 'ramen' ? 'tag-s' : 'tag-g';
+      menus.push({
+        id: id,
+        name: name,
+        cat: cat,
+        price: price,
+        tag: cat === 'ramen' ? 'Shoyu' : cat === 'minuman' ? 'Dingin' : 'Goreng',
+        tagClass: tagClass,
+        detail: cat === 'ramen' ? 'Chashu · Tamago · Nori' : 'Standard portion'
+      });
+      renderMenus();
+      renderDataMenuTable();
+      closeMenuModal();
+    }
+  } else {
+    if (window.javaApp) {
+      var resRaw = window.javaApp.editMenu(id, name, price, cat);
+      var res = JSON.parse(resRaw);
+      if (res.success) {
+        var menusRaw = window.javaApp.getMenusJson();
+        menus = JSON.parse(menusRaw);
+        renderMenus();
+        renderDataMenuTable();
+        closeMenuModal();
+      } else {
+        alert(res.message);
+      }
+    } else {
+      var m = menus.find(function(item){return item.id === id});
+      if (m) {
+        m.name = name;
+        m.cat = cat;
+        m.price = price;
+      }
+      renderMenus();
+      renderDataMenuTable();
+      closeMenuModal();
+    }
+  }
+}
+
+function deleteMenuAction(id) {
+  if (!confirm("Apakah Anda yakin ingin menghapus menu " + id + "?")) {
+    return;
+  }
+  
+  if (window.javaApp) {
+    var resRaw = window.javaApp.deleteMenu(id);
+    var res = JSON.parse(resRaw);
+    if (res.success) {
+      var menusRaw = window.javaApp.getMenusJson();
+      menus = JSON.parse(menusRaw);
+      renderMenus();
+      renderDataMenuTable();
+    } else {
+      alert(res.message);
+    }
+  } else {
+    var idx = menus.findIndex(function(m){return m.id === id});
+    if (idx !== -1) {
+      menus.splice(idx, 1);
+    }
+    renderMenus();
+    renderDataMenuTable();
+  }
+}
+
 function logout() {
   if (window.javaApp) {
     window.javaApp.exitApp();
@@ -978,6 +1234,11 @@ document.addEventListener('click', function(e) {
   if (rcptModal && rcptModal.style.display === 'flex' && e.target === rcptModal) {
     closeReceiptModal();
   }
+  // Menu modal
+  var menuModal = document.getElementById('menuModal');
+  if (menuModal && menuModal.style.display === 'flex' && e.target === menuModal) {
+    closeMenuModal();
+  }
 });
 
 // === ESC key untuk tutup modal ===
@@ -996,6 +1257,11 @@ document.addEventListener('keydown', function(e) {
     var rcptModal = document.getElementById('receiptModal');
     if (rcptModal && rcptModal.style.display === 'flex') {
       closeReceiptModal();
+      return;
+    }
+    var menuModal = document.getElementById('menuModal');
+    if (menuModal && menuModal.style.display === 'flex') {
+      closeMenuModal();
       return;
     }
   }

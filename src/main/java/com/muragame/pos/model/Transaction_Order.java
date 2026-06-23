@@ -18,8 +18,8 @@ public class Transaction_Order {
         this.idOrder = idOrder;
         this.tanggalWaktu = new Date();
         this.invoiceItems = new ArrayList<>();
-        // Default customer: Member Budi Santoso
-        this.customer = new MemberCustomer("C001", "Budi Santoso");
+        // Default customer: RegularCustomer Umum
+        this.customer = new RegularCustomer("C-DEFAULT", "Umum");
         this.layanan = new DineInLayanan();
         recalculate();
     }

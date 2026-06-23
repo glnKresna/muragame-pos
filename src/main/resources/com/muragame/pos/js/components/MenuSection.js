@@ -45,6 +45,31 @@ class MenuSection extends HTMLElement {
           </table>
         </div>
       </div>
+
+      <!-- Data Menu View (Hidden by default) -->
+      <div id="dataMenuView" style="display:none; overflow-y: auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div class="sec-label" style="margin-bottom:0;">Manajemen Data Menu</div>
+          <button class="quick-cash-btn" onclick="openMenuModal('add')" style="padding:6px 12px; font-weight:500; display:flex; align-items:center; gap:4px; background:var(--color-background-success); color:var(--color-text-success); border-color:var(--color-border-success);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Menu Baru
+          </button>
+        </div>
+        <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); overflow:hidden;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>ID Menu</th>
+                <th>Nama Menu</th>
+                <th>Kategori</th>
+                <th>Harga</th>
+                <th style="text-align:right;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="dataMenuTableBody"></tbody>
+          </table>
+        </div>
+      </div>
     `;
   }
 }

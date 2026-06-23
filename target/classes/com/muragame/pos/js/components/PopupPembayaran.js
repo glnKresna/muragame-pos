@@ -12,6 +12,16 @@ class PopupPembayaran extends HTMLElement {
             <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:4px;">Total Tagihan</div>
             <div id="modalTotal" style="font-size:20px; font-weight:600; color:var(--color-text-info);">Rp 0</div>
           </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div>
+              <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:6px;">Nama Pelanggan (1 kata)</label>
+              <input type="text" id="custNameInput" value="Umum" placeholder="Contoh: Budi" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:13px;">
+            </div>
+            <div>
+              <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:6px;">Diskon Manual (Rp)</label>
+              <input type="number" id="manualDiscInput" value="0" min="0" oninput="updatePaymentTotals()" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:13px;">
+            </div>
+          </div>
           
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
             <div id="btnPayCash" class="pay-opt sel" onclick="selectPayMethod('CASH')">

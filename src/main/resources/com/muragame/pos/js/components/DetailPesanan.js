@@ -5,10 +5,10 @@ class DetailPesanan extends HTMLElement {
       <div class="cart-top">
         <div class="cart-title">Detail pesanan</div>
         <div class="cust-row">
-          <div class="cust-av">BS</div>
+          <div class="cust-av" id="custAvLabel">UM</div>
           <div>
-            <div class="cust-name">Budi Santoso</div>
-            <div class="cust-type">Member · diskon 10%</div>
+            <div class="cust-name" id="custNameLabel">Umum</div>
+            <div class="cust-type" id="custTypeLabel">Regular Customer</div>
           </div>
         </div>
       </div>

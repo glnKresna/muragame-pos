@@ -24,28 +24,69 @@ public class JavaBridge {
     private void initializeMenus() {
         menus = new ArrayList<>();
         
-        // 12 Ramen Menus (M001 - M012)
-        menus.add(new RamenMenu("M001", "Shio Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
-        menus.add(new RamenMenu("M002", "Shoyu Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
-        menus.add(new RamenMenu("M003", "Miso Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
-        menus.add(new RamenMenu("M004", "Paitan Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
-        
-        menus.add(new RamenMenu("M005", "Shio Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
-        menus.add(new RamenMenu("M006", "Shoyu Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
-        menus.add(new RamenMenu("M007", "Miso Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
-        menus.add(new RamenMenu("M008", "Paitan Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
-        
-        menus.add(new RamenMenu("M009", "Shio Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
-        menus.add(new RamenMenu("M010", "Shoyu Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
-        menus.add(new RamenMenu("M011", "Miso Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
-        menus.add(new RamenMenu("M012", "Paitan Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
-        
-        // 5 General Menus (M013 - M017)
-        menus.add(new GeneralMenu("M013", "Es Matcha Latte", 22000, "minuman", true, "Less sugar available"));
-        menus.add(new GeneralMenu("M014", "Es Teh Tarik", 15000, "minuman", true, "Creamy blend"));
-        menus.add(new GeneralMenu("M015", "Gyoza (6 pcs)", 28000, "snack", false, "Pork Filling"));
-        menus.add(new GeneralMenu("M016", "Karaage", 25000, "snack", false, "Chicken · Mayo sauce"));
-        menus.add(new GeneralMenu("M017", "Takoyaki (6)", 23000, "snack", false, "Octopus · Bonito"));
+        boolean loadedFromDb = loadMenusFromDatabase();
+        if (!loadedFromDb || menus.isEmpty()) {
+            System.out.println("[DB] Menggunakan menu default (fallback) karena database kosong/gagal koneksi.");
+            menus.clear();
+            // 12 Ramen Menus (M001 - M012)
+            menus.add(new RamenMenu("M001", "Shio Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
+            menus.add(new RamenMenu("M002", "Shoyu Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
+            menus.add(new RamenMenu("M003", "Miso Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
+            menus.add(new RamenMenu("M004", "Paitan Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
+            
+            menus.add(new RamenMenu("M005", "Shio Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
+            menus.add(new RamenMenu("M006", "Shoyu Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
+            menus.add(new RamenMenu("M007", "Miso Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
+            menus.add(new RamenMenu("M008", "Paitan Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
+            
+            menus.add(new RamenMenu("M009", "Shio Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
+            menus.add(new RamenMenu("M010", "Shoyu Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
+            menus.add(new RamenMenu("M011", "Miso Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
+            menus.add(new RamenMenu("M012", "Paitan Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
+            
+            // 5 General Menus (M013 - M017)
+            menus.add(new GeneralMenu("M013", "Es Matcha Latte", 22000, "minuman", true, "Less sugar available"));
+            menus.add(new GeneralMenu("M014", "Es Teh Tarik", 15000, "minuman", true, "Creamy blend"));
+            menus.add(new GeneralMenu("M015", "Gyoza (6 pcs)", 28000, "snack", false, "Pork Filling"));
+            menus.add(new GeneralMenu("M016", "Karaage", 25000, "snack", false, "Chicken · Mayo sauce"));
+            menus.add(new GeneralMenu("M017", "Takoyaki (6)", 23000, "snack", false, "Octopus · Bonito"));
+        }
+    }
+
+    private boolean loadMenusFromDatabase() {
+        try {
+            java.sql.Connection conn = com.muragame.pos.database.DatabaseConnection.getInstance().getConnection();
+            if (conn == null) return false;
+            
+            String sql = "SELECT * FROM menu ORDER BY id_menu";
+            try (java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+                 java.sql.ResultSet rs = ps.executeQuery()) {
+                
+                while (rs.next()) {
+                    String id = rs.getString("id_menu");
+                    String nama = rs.getString("nama_menu");
+                    double harga = rs.getDouble("harga");
+                    String kategori = rs.getString("kategori");
+                    String tipe = rs.getString("tipe_menu");
+                    
+                    if ("ramen".equalsIgnoreCase(tipe)) {
+                        int pedas = rs.getInt("tingkat_kepedasan");
+                        String tekstur = rs.getString("tekstur_mi");
+                        String topping = rs.getString("topping_tambahan");
+                        String detail = rs.getString("detail_khusus");
+                        menus.add(new RamenMenu(id, nama, harga, kategori, pedas, tekstur, topping, detail));
+                    } else {
+                        boolean isCold = rs.getBoolean("is_cold");
+                        String detail = rs.getString("detail_khusus");
+                        menus.add(new GeneralMenu(id, nama, harga, kategori, isCold, detail));
+                    }
+                }
+                return true;
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("[DB] Gagal meload menu dari DB: " + e.getMessage());
+            return false;
+        }
     }
 
     public void startNewOrder() {
@@ -193,7 +234,15 @@ public class JavaBridge {
         return sb.toString();
     }
 
-    public String processPayment(String method, double payAmount) {
+    public String processPayment(String method, double payAmount, String customerName, double discountAmount) {
+        if (customerName == null || customerName.trim().isEmpty() || customerName.trim().split("\\s+").length > 1) {
+            return "{\"success\":false,\"message\":\"Pembayaran gagal! Nama pelanggan harus berupa satu kata saja.\"}";
+        }
+        
+        RegularCustomer regCust = new RegularCustomer("C-" + System.currentTimeMillis(), customerName.trim());
+        regCust.setCustomDiscount(discountAmount);
+        currentOrder.setCustomer(regCust);
+
         double total = currentOrder.getTotalBersih();
         String idPay = "PAY-" + System.currentTimeMillis();
         Payment payment;
@@ -309,6 +358,124 @@ public class JavaBridge {
      */
     public String getHistoryFromDB(String filter) {
         return transactionRepository.getHistoryFromDB(filter);
+    }
+
+    public String addMenu(String id, String name, double price, String category) {
+        for (Menu m : menus) {
+            if (m.getIdMenu().equalsIgnoreCase(id)) {
+                return "{\"success\":false,\"message\":\"ID Menu sudah digunakan!\"}";
+            }
+        }
+        
+        String tipe = category.equalsIgnoreCase("ramen") ? "ramen" : "general";
+        Menu newMenu;
+        if (tipe.equals("ramen")) {
+            newMenu = new RamenMenu(id, name, price, category, 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori");
+        } else {
+            boolean isCold = category.equalsIgnoreCase("minuman");
+            String detail = category.equalsIgnoreCase("minuman") ? "Less sugar available" : "Japanese snack";
+            newMenu = new GeneralMenu(id, name, price, category, isCold, detail);
+        }
+        
+        menus.add(newMenu);
+        
+        try {
+            java.sql.Connection conn = com.muragame.pos.database.DatabaseConnection.getInstance().getConnection();
+            if (conn != null) {
+                String sql = "INSERT INTO menu (id_menu, nama_menu, harga, kategori, tipe_menu, tingkat_kepedasan, tekstur_mi, topping_tambahan, is_cold, detail_khusus) " +
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setString(1, id);
+                    ps.setString(2, name);
+                    ps.setDouble(3, price);
+                    ps.setString(4, category.toLowerCase());
+                    ps.setString(5, tipe);
+                    if (tipe.equals("ramen")) {
+                        ps.setInt(6, 0);
+                        ps.setString(7, "Sedang");
+                        ps.setString(8, "Chashu, Tamago, Nori");
+                        ps.setNull(9, java.sql.Types.BOOLEAN);
+                        ps.setString(10, "Chashu · Tamago · Nori");
+                    } else {
+                        ps.setNull(6, java.sql.Types.INTEGER);
+                        ps.setNull(7, java.sql.Types.VARCHAR);
+                        ps.setNull(8, java.sql.Types.VARCHAR);
+                        ps.setBoolean(9, category.equalsIgnoreCase("minuman"));
+                        ps.setString(10, category.equalsIgnoreCase("minuman") ? "Less sugar available" : "Japanese snack");
+                    }
+                    ps.executeUpdate();
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("[DB] Gagal menyimpan menu baru ke DB: " + e.getMessage());
+        }
+        
+        return "{\"success\":true}";
+    }
+
+    public String editMenu(String id, String name, double price, String category) {
+        Menu target = null;
+        for (Menu m : menus) {
+            if (m.getIdMenu().equalsIgnoreCase(id)) {
+                target = m;
+                break;
+            }
+        }
+        if (target == null) {
+            return "{\"success\":false,\"message\":\"Menu tidak ditemukan!\"}";
+        }
+        
+        target.setNamaMenu(name);
+        target.setHarga(price);
+        target.setKategori(category);
+        
+        try {
+            java.sql.Connection conn = com.muragame.pos.database.DatabaseConnection.getInstance().getConnection();
+            if (conn != null) {
+                String sql = "UPDATE menu SET nama_menu = ?, harga = ?, kategori = ? WHERE id_menu = ?";
+                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setString(1, name);
+                    ps.setDouble(2, price);
+                    ps.setString(3, category.toLowerCase());
+                    ps.setString(4, id);
+                    ps.executeUpdate();
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("[DB] Gagal mengupdate menu di DB: " + e.getMessage());
+        }
+        
+        return "{\"success\":true}";
+    }
+
+    public String deleteMenu(String id) {
+        Menu target = null;
+        for (Menu m : menus) {
+            if (m.getIdMenu().equalsIgnoreCase(id)) {
+                target = m;
+                break;
+            }
+        }
+        if (target == null) {
+            return "{\"success\":false,\"message\":\"Menu tidak ditemukan!\"}";
+        }
+        
+        try {
+            java.sql.Connection conn = com.muragame.pos.database.DatabaseConnection.getInstance().getConnection();
+            if (conn != null) {
+                String sql = "DELETE FROM menu WHERE id_menu = ?";
+                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setString(1, id);
+                    ps.executeUpdate();
+                }
+            }
+            menus.remove(target);
+        } catch (java.sql.SQLException e) {
+            System.err.println("[DB] Gagal menghapus menu dari DB: " + e.getMessage());
+            return "{\"success\":false,\"message\":\"Tidak dapat menghapus menu karena menu ini sudah memiliki riwayat transaksi.\"}";
+        }
+        
+        return "{\"success\":true}";
     }
 
     private String escapeJson(String s) {

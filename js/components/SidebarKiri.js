@@ -14,14 +14,8 @@ class SidebarKiri extends HTMLElement {
         <div class="sb-dot" style="background:var(--color-border-secondary)"></div>Riwayat Order
       </div>
       <div class="sb-section">MANAJEMEN</div>
-      <div class="sb-item">
+      <div id="sbDataMenu" class="sb-item" onclick="switchView('datamenu')">
         <div class="sb-dot" style="background:var(--color-border-secondary)"></div>Data Menu
-      </div>
-      <div class="sb-item">
-        <div class="sb-dot" style="background:var(--color-border-secondary)"></div>Pelanggan
-      </div>
-      <div class="sb-item">
-        <div class="sb-dot" style="background:var(--color-border-secondary)"></div>Laporan
       </div>
       <div class="sb-spacer"></div>
       <div class="sb-section">SESSION</div>
