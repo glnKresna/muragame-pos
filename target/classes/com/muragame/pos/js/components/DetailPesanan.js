@@ -4,13 +4,6 @@ class DetailPesanan extends HTMLElement {
     this.innerHTML = `
       <div class="cart-top">
         <div class="cart-title">Detail pesanan</div>
-        <div class="cust-row">
-          <div class="cust-av" id="custAvLabel">UM</div>
-          <div>
-            <div class="cust-name" id="custNameLabel">Umum</div>
-            <div class="cust-type" id="custTypeLabel">Regular Customer</div>
-          </div>
-        </div>
       </div>
       <div class="cart-items" id="cartItems">
         <div class="cart-empty" id="cartEmpty">

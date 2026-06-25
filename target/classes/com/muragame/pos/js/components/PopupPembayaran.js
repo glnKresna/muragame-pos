@@ -53,10 +53,8 @@ class PopupPembayaran extends HTMLElement {
           <!-- QRIS Section -->
           <div id="qrisSection" style="display:none; text-align:center; margin-bottom:15px; padding:10px; background:var(--color-background-secondary); border-radius:var(--border-radius-md);">
             <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:8px;">Silakan Scan QRIS MuragamePOS</div>
-            <div style="margin: 0 auto; width: 120px; height: 120px; background: white; padding: 10px; display: flex; align-items: center; justify-content: center; border: 0.5px solid var(--color-border-tertiary); border-radius: 4px;">
-              <svg width="100" height="100" viewBox="0 0 29 29" fill="black">
-                <path d="M0 0h9v9H0zm1 1v7h7V1zm8 0h3v1H9zm0 2h1v3H9zm1-1h1v1h-1zm1 2h1v1h-1zm0 2h1v1h-1zm1 1h1v1h-1zm-1-7h1v1h-1zm0 2h1v1h-1zm2 1h1v2h-1zm1-3v1h1V3zm2 0h1v1h-1zm-1 3v1h1V6zm3-3h1v1h-1zm-1 4h1v1h-1zm3-4h6v6h-6zm1 1v4h4V10zm-9 6h1v1H9zm1 1h1v1h-1zm0-2h1v1h-1zm2 1h1v1h-1zm-1 2h1v1h-1zm2-2h1v1h-1zm1 1h1v1h-1zm1-2h1v1h-1zm1 1h1v1h-1zm-3 2h1v2h-1zm1 1v1h1v-1zm1-3h1v1h-1zm2 1h1v2h-1zm1 1v1h1v-1zm1-3v1h1v-1zm0 2h1v1h-1zm-13 4h9v9H0zm1 1v7h7v-7zm12-4h1v1h-1zm1 1v1h1v-1zm-2 2h1v1h-1zm3-1h1v2h-1zm-2 2h1v1h-1zm2 1h1v1h-1zm-2 1h1v1h-1zm1-3v1h1v-1zm0 4v1h1v-1zm3-3h1v1h-1zm0 2h1v1h-1zm1-1h1v1h-1zm1-2h1v1h-1zm0 2h1v1h-1zm1 1h1v1h-1zm-1 2h1v1h-1zm1 1h1v1h-1zm-5-10h1v1h-1zm2 1h1v1h-1zm-1 2h1v1h-1zm2-1h1v1h-1z"/>
-              </svg>
+            <div style="margin: 0 auto; width: 220px; height: 220px; background: white; padding: 10px; display: flex; align-items: center; justify-content: center; border: 0.5px solid var(--color-border-tertiary); border-radius: 4px;">
+              <img src="img/qris.png" style="width: 200px; height: 200px; object-fit: contain;">
             </div>
             <div style="font-size:10px; color:var(--color-text-tertiary); margin-top:8px;">Simulasi QRIS Aktif</div>
           </div>
@@ -114,49 +112,49 @@ var discountedTotalValue = 0;
 var activeHistoryFilter = 'today';
 
 // Payment processing functions
-window.updatePaymentTotals = function() {
+window.updatePaymentTotals = function () {
   var discPercentage = parseFloat(document.getElementById('manualDiscInput').value) || 0;
   if (discPercentage < 0) discPercentage = 0;
   if (discPercentage > 100) {
     discPercentage = 100;
     document.getElementById('manualDiscInput').value = 100;
   }
-  
+
   var subtotalText = document.getElementById('fSubtotal') ? document.getElementById('fSubtotal').textContent : "0";
   var subtotalVal = parseFloat(subtotalText.replace(/[^0-9]/g, '')) || 0;
   var discRupiah = Math.round(subtotalVal * (discPercentage / 100));
-  
+
   discountedTotalValue = Math.max(0, originalTotalValue - discRupiah);
   document.getElementById('modalTotal').textContent = fmt(discountedTotalValue);
-  
+
   calcChange();
 };
 
-window.goPayment = function() {
+window.goPayment = function () {
   originalTotalValue = currentTotalValue;
   discountedTotalValue = currentTotalValue;
-  
+
   document.getElementById('custNameInput').value = 'Umum';
   document.getElementById('manualDiscInput').value = 0;
-  
+
   document.getElementById('cashAmount').value = '';
   document.getElementById('cashChange').textContent = 'Rp 0';
   document.getElementById('confirmPayBtn').disabled = activePayMethod === 'CASH';
-  
+
   selectPayMethod('CASH');
   updatePaymentTotals();
-  
+
   document.getElementById('paymentModal').style.display = 'flex';
 };
 
-window.closePaymentModal = function() {
+window.closePaymentModal = function () {
   document.getElementById('paymentModal').style.display = 'none';
 };
 
-window.selectPayMethod = function(method) {
+window.selectPayMethod = function (method) {
   activePayMethod = method;
-  document.querySelectorAll('.pay-opt').forEach(function(o){o.classList.remove('sel')});
-  
+  document.querySelectorAll('.pay-opt').forEach(function (o) { o.classList.remove('sel') });
+
   if (method === 'CASH') {
     document.getElementById('btnPayCash').classList.add('sel');
     document.getElementById('cashSection').style.display = 'block';
@@ -170,7 +168,7 @@ window.selectPayMethod = function(method) {
   }
 };
 
-window.setQuickCash = function(val) {
+window.setQuickCash = function (val) {
   var cashInput = document.getElementById('cashAmount');
   if (val === 'pas') {
     cashInput.value = discountedTotalValue;
@@ -180,12 +178,12 @@ window.setQuickCash = function(val) {
   calcChange();
 };
 
-window.calcChange = function() {
+window.calcChange = function () {
   if (activePayMethod !== 'CASH') return;
-  
+
   var cashReceived = parseFloat(document.getElementById('cashAmount').value) || 0;
   var change = cashReceived - discountedTotalValue;
-  
+
   var changeEl = document.getElementById('cashChange');
   if (change < 0) {
     changeEl.textContent = 'Kurang ' + fmt(Math.abs(change));
@@ -198,24 +196,24 @@ window.calcChange = function() {
   }
 };
 
-window.confirmPayment = function() {
+window.confirmPayment = function () {
   var custName = document.getElementById('custNameInput').value.trim();
   if (custName === "") {
     alert("Nama pelanggan tidak boleh kosong!");
     return;
   }
-  
+
   if (custName.split(/\s+/).length > 1) {
     alert("Nama pelanggan hanya boleh satu kata saja!");
     return;
   }
-  
+
   var discountAmount = parseFloat(document.getElementById('manualDiscInput').value) || 0;
   if (discountAmount < 0) {
     alert("Diskon tidak boleh negatif!");
     return;
   }
-  
+
   var cashReceived = 0;
   if (activePayMethod === 'CASH') {
     cashReceived = parseFloat(document.getElementById('cashAmount').value) || 0;
@@ -224,11 +222,11 @@ window.confirmPayment = function() {
       return;
     }
   }
-  
+
   if (window.javaApp) {
     var responseRaw = window.javaApp.processPayment(activePayMethod, cashReceived, custName, discountAmount);
     var response = JSON.parse(responseRaw);
-    
+
     if (response.success) {
       closePaymentModal();
       showReceipt(response);
@@ -238,27 +236,27 @@ window.confirmPayment = function() {
     }
   } else {
     var subtotal = 0;
-    mockCart.forEach(function(item) {
+    mockCart.forEach(function (item) {
       subtotal += item.price * item.qty;
     });
     var discRupiah = Math.round(subtotal * (discountAmount / 100));
     var total = subtotal > 0 ? (subtotal + mockSvcPrice - discRupiah) : 0;
     if (total < 0) total = 0;
-    
+
     var change = activePayMethod === 'CASH' ? (cashReceived - total) : 0;
-    
+
     var dateStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
     var orderId = "ORD-MOCK-" + (mockHistory.length + 101);
-    
+
     var txItems = [];
-    mockCart.forEach(function(item) {
+    mockCart.forEach(function (item) {
       txItems.push({
         name: item.name,
         qty: item.qty,
         total: item.lineTotal
       });
     });
-    
+
     var response = {
       success: true,
       orderId: orderId,
@@ -273,7 +271,7 @@ window.confirmPayment = function() {
       change: change,
       items: txItems
     };
-    
+
     mockHistory.push({
       orderId: orderId,
       date: dateStr,
@@ -288,7 +286,7 @@ window.confirmPayment = function() {
       change: change,
       items: txItems
     });
-    
+
     mockCart = [];
     closePaymentModal();
     showReceipt(response);
@@ -296,7 +294,7 @@ window.confirmPayment = function() {
   }
 };
 
-window.showReceipt = function(data) {
+window.showReceipt = function (data) {
   document.getElementById('rOrderId').textContent = data.orderId;
   document.getElementById('rDate').textContent = data.date;
   document.getElementById('rCustomer').textContent = data.customerName;
@@ -307,85 +305,85 @@ window.showReceipt = function(data) {
   document.getElementById('rMethod').textContent = data.method;
   document.getElementById('rPaid').textContent = fmt(data.paid);
   document.getElementById('rChange').textContent = fmt(data.change);
-  
+
   var itemsWrap = document.getElementById('rItems');
   if (!itemsWrap) return;
   itemsWrap.innerHTML = '';
-  data.items.forEach(function(item) {
+  data.items.forEach(function (item) {
     var line = document.createElement('div');
     line.style.display = 'flex';
     line.style.justifyContent = 'space-between';
-    line.innerHTML = '<span>' + item.name + ' x' + item.qty + '</span>' + 
-                     '<span>' + fmt(item.total) + '</span>';
+    line.innerHTML = '<span>' + item.name + ' x' + item.qty + '</span>' +
+      '<span>' + fmt(item.total) + '</span>';
     itemsWrap.appendChild(line);
   });
-  
+
   document.getElementById('receiptModal').style.display = 'flex';
 };
 
-window.closeReceiptModal = function() {
+window.closeReceiptModal = function () {
   document.getElementById('receiptModal').style.display = 'none';
 };
 
-window.filterHistory = function(filter, el) {
+window.filterHistory = function (filter, el) {
   activeHistoryFilter = filter;
-  document.querySelectorAll('.hist-filter').forEach(function(f){f.classList.remove('active')});
+  document.querySelectorAll('.hist-filter').forEach(function (f) { f.classList.remove('active') });
   if (el) el.classList.add('active');
   renderHistory();
 };
 
-window.renderHistory = function() {
+window.renderHistory = function () {
   if (window.javaApp) {
     // Load from database with filter
     var dbHistoryRaw = window.javaApp.getHistoryFromDB(activeHistoryFilter);
     var dbHistory = JSON.parse(dbHistoryRaw);
-    
+
     // Also include current session history (not yet in DB if just paid)
     var sessionRaw = window.javaApp.getHistoryJson();
     var sessionHistory = JSON.parse(sessionRaw);
-    
+
     // Merge: DB first, then session items not already in DB
     var dbIds = {};
-    dbHistory.forEach(function(t){ dbIds[t.orderId] = true; });
+    dbHistory.forEach(function (t) { dbIds[t.orderId] = true; });
     pastTransactionsList = dbHistory.slice();
-    sessionHistory.forEach(function(t){
+    sessionHistory.forEach(function (t) {
       if (!dbIds[t.orderId]) pastTransactionsList.push(t);
     });
   } else {
     pastTransactionsList = mockHistory;
   }
-  
+
   var countEl = document.getElementById('historyCount');
   if (countEl) countEl.textContent = pastTransactionsList.length + ' Transaksi';
-  
+
   var tbody = document.getElementById('historyTableBody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  
+
   if (pastTransactionsList.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center; color:var(--color-text-tertiary);">Belum ada riwayat transaksi</td></tr>';
     return;
   }
-  
-  pastTransactionsList.forEach(function(tx, index) {
+
+  pastTransactionsList.forEach(function (tx, index) {
     var timeOnly = tx.date.split(' ')[1] || tx.date;
     var tr = document.createElement('tr');
     tr.innerHTML = '<td style="padding:10px 14px; font-weight:500;">' + tx.orderId + '</td>' +
-                   '<td style="padding:10px 14px; color:var(--color-text-secondary);">' + timeOnly + '</td>' +
-                   '<td style="padding:10px 14px;">' + tx.customerName + '</td>' +
-                   '<td style="padding:10px 14px; color:var(--color-text-secondary);">' + tx.serviceName + '</td>' +
-                   '<td style="padding:10px 14px; font-weight:600; color:var(--color-text-info);">' + fmt(tx.total) + '</td>' +
-                   '<td style="padding:10px 14px; text-align:right;">' +
-                     '<button class="quick-cash-btn" onclick="reprintStruk(' + index + ')" style="padding:4px 8px;">Lihat Struk</button>' +
-                   '</td>';
+      '<td style="padding:10px 14px; color:var(--color-text-secondary);">' + timeOnly + '</td>' +
+      '<td style="padding:10px 14px;">' + tx.customerName + '</td>' +
+      '<td style="padding:10px 14px; color:var(--color-text-secondary);">' + tx.serviceName + '</td>' +
+      '<td style="padding:10px 14px; font-weight:600; color:var(--color-text-info);">' + fmt(tx.total) + '</td>' +
+      '<td style="padding:10px 14px; text-align:right;">' +
+      '<button class="quick-cash-btn" onclick="reprintStruk(' + index + ')" style="padding:4px 8px;">Lihat Struk</button>' +
+      '</td>';
     tbody.appendChild(tr);
   });
 };
 
-window.reprintStruk = function(index) {
+window.reprintStruk = function (index) {
   var tx = pastTransactionsList[index];
   if (!tx) return;
-  
+
   var data = {
     orderId: tx.orderId,
     date: tx.date,
@@ -399,6 +397,6 @@ window.reprintStruk = function(index) {
     change: tx.change || 0,
     items: tx.items
   };
-  
+
   showReceipt(data);
 };

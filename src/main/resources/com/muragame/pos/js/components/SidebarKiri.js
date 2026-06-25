@@ -31,6 +31,9 @@ customElements.define('sidebar-kiri', SidebarKiri);
 window.switchView = function(view) {
   var menuSectionEl = document.getElementById('menuSectionEl');
   var detailPesananEl = document.getElementById('detailPesananEl');
+  var topbar = document.querySelector('.topbar');
+  var topbarTitle = document.querySelector('.topbar-title');
+  var orderIdEl = document.getElementById('orderId');
   
   if (view === 'transaksi') {
     activeView = 'transaksi';
@@ -40,6 +43,20 @@ window.switchView = function(view) {
     document.getElementById('sbTransaksi').querySelector('.sb-dot').style.backgroundColor = 'var(--color-text-info)';
     document.getElementById('sbRiwayat').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
     document.getElementById('sbDataMenu').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
+    
+    if (topbar) {
+      topbar.style.gridColumn = '2';
+    }
+    if (topbarTitle) {
+      topbarTitle.textContent = 'Transaksi Baru';
+    }
+    if (orderIdEl) {
+      if (window.javaApp) {
+        orderIdEl.textContent = window.javaApp.getOrderId();
+      } else {
+        orderIdEl.textContent = "ORD-MOCK-" + (mockHistory.length + 100);
+      }
+    }
     
     if (menuSectionEl) {
       menuSectionEl.style.gridColumn = '2';
@@ -60,6 +77,16 @@ window.switchView = function(view) {
     document.getElementById('sbRiwayat').querySelector('.sb-dot').style.backgroundColor = 'var(--color-text-info)';
     document.getElementById('sbDataMenu').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
     
+    if (topbar) {
+      topbar.style.gridColumn = '2 / 4';
+    }
+    if (topbarTitle) {
+      topbarTitle.textContent = 'Riwayat Transaksi';
+    }
+    if (orderIdEl) {
+      orderIdEl.textContent = 'Lihat dan kelola riwayat transaksi penjualan';
+    }
+    
     if (menuSectionEl) {
       menuSectionEl.style.gridColumn = '2 / 4';
       document.getElementById('menuViewSection').style.display = 'none';
@@ -79,6 +106,16 @@ window.switchView = function(view) {
     document.getElementById('sbTransaksi').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
     document.getElementById('sbRiwayat').querySelector('.sb-dot').style.backgroundColor = 'var(--color-border-secondary)';
     document.getElementById('sbDataMenu').querySelector('.sb-dot').style.backgroundColor = 'var(--color-text-info)';
+    
+    if (topbar) {
+      topbar.style.gridColumn = '2 / 4';
+    }
+    if (topbarTitle) {
+      topbarTitle.textContent = 'Manajemen Menu';
+    }
+    if (orderIdEl) {
+      orderIdEl.textContent = 'Tambah, edit, dan hapus item menu restoran';
+    }
     
     if (menuSectionEl) {
       menuSectionEl.style.gridColumn = '2 / 4';

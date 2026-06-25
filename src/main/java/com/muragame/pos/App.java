@@ -54,7 +54,7 @@ public class App extends Application {
             
             primaryStage.setTitle("Muragame POS - Kasir Restoran");
             primaryStage.setScene(scene);
-            primaryStage.setResizable(false);
+            primaryStage.setResizable(true);
             primaryStage.show();
 
         } catch (Exception e) {

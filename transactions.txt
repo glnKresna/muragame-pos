@@ -15,3 +15,127 @@ Kembalian  : Rp          0
 Status     : LUNAS
 ==========================================
 
+==========================================
+TRANSAKSI: ORD-20260626-197
+Waktu    : 2026-06-26 01:53:00
+Pelanggan: Umum (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Shoyu Tori Ramen     x1    Rp     38.000
+------------------------------------------
+Subtotal   : Rp     38.000
+Diskon     : Rp          0
+Total      : Rp     38.000
+Metode     : QRIS
+Dibayar    : Rp     38.000
+Kembalian  : Rp          0
+Status     : LUNAS
+==========================================
+
+==========================================
+TRANSAKSI: ORD-20260626-403
+Waktu    : 2026-06-26 01:53:26
+Pelanggan: Umum (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Shoyu Beef Ramen     x1    Rp     45.000
+------------------------------------------
+Subtotal   : Rp     45.000
+Diskon     : Rp          0
+Total      : Rp     45.000
+Metode     : CASH
+Dibayar    : Rp    100.000
+Kembalian  : Rp     55.000
+Status     : LUNAS
+==========================================
+
+==========================================
+TRANSAKSI: ORD-20260626-496
+Waktu    : 2026-06-26 01:55:04
+Pelanggan: Umum (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Shio Beef Ramen      x1    Rp     45.000
+------------------------------------------
+Subtotal   : Rp     45.000
+Diskon     : Rp          0
+Total      : Rp     45.000
+Metode     : QRIS
+Dibayar    : Rp     45.000
+Kembalian  : Rp          0
+Status     : LUNAS
+==========================================
+
+==========================================
+TRANSAKSI: ORD-20260626-295
+Waktu    : 2026-06-26 01:57:08
+Pelanggan: Umum (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Miso Tori Ramen      x1    Rp     38.000
+------------------------------------------
+Subtotal   : Rp     38.000
+Diskon     : Rp      7.600
+Total      : Rp     30.400
+Metode     : QRIS
+Dibayar    : Rp     30.400
+Kembalian  : Rp          0
+Status     : LUNAS
+==========================================
+
+==========================================
+TRANSAKSI: ORD-20260626-288
+Waktu    : 2026-06-26 02:17:38
+Pelanggan: awikwok (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Shoyu Tori Ramen     x1    Rp     38.000
+------------------------------------------
+Subtotal   : Rp     38.000
+Diskon     : Rp      3.800
+Total      : Rp     34.200
+Metode     : CASH
+Dibayar    : Rp    100.000
+Kembalian  : Rp     65.800
+Status     : LUNAS
+==========================================
+
+==========================================
+TRANSAKSI: ORD-20260626-575
+Waktu    : 2026-06-26 02:20:24
+Pelanggan: Umum (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Shoyu Tori Ramen     x1    Rp     38.000
+------------------------------------------
+Subtotal   : Rp     38.000
+Diskon     : Rp          0
+Total      : Rp     38.000
+Metode     : CASH
+Dibayar    : Rp    100.000
+Kembalian  : Rp     62.000
+Status     : LUNAS
+==========================================
+
+==========================================
+TRANSAKSI: ORD-20260626-223
+Waktu    : 2026-06-26 02:23:43
+Pelanggan: Mbudi (Regular)
+Layanan  : Delivery (Rp 15000.0)
+------------------------------------------
+Shoyu Tori Ramen     x1    Rp     38.000
+Paitan Tori Ramen    x1    Rp     38.000
+Shoyu Beef Ramen     x1    Rp     45.000
+Miso Tori Ramen      x1    Rp     38.000
+Paitan Beef Ramen    x1    Rp     45.000
+Miso Beef Ramen      x1    Rp     45.000
+------------------------------------------
+Subtotal   : Rp    249.000
+Diskon     : Rp    199.200
+Total      : Rp     64.800
+Metode     : CASH
+Dibayar    : Rp     64.800
+Kembalian  : Rp          0
+Status     : LUNAS
+==========================================
+

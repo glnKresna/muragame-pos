@@ -57,8 +57,9 @@ public class TransactionRepository {
             conn.setAutoCommit(false);
 
             // 1. INSERT ke tabel transactions
-            String sqlTransaction = "INSERT INTO transactions (id_order, tanggal_waktu, id_customer, id_layanan, id_kasir, sub_total, diskon, total_bersih) " +
-                                     "VALUES (?, NOW(), ?, ?, ?, ?, ?, ?)";
+            String sqlTransaction = "INSERT INTO transactions (id_order, tanggal_waktu, id_customer, id_layanan, id_kasir, sub_total, diskon, total_bersih) "
+                    +
+                    "VALUES (?, NOW(), ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(sqlTransaction)) {
                 ps.setString(1, order.getIdOrder());
                 ps.setString(2, order.getCustomer().getIdCustomer());
@@ -75,8 +76,9 @@ public class TransactionRepository {
                 // Jika ada kustomisasi, simpan dulu
                 KustomisasiPesanan kustomisasi = item.getKustomisasi();
                 if (kustomisasi != null) {
-                    String sqlKustomisasi = "INSERT INTO kustomisasi_pesanan (id_kustomisasi, tingkat_kepedasan, kuah, topping, catatan_umum, is_ramen) " +
-                                             "VALUES (?, ?, ?, ?, ?, ?)";
+                    String sqlKustomisasi = "INSERT INTO kustomisasi_pesanan (id_kustomisasi, tingkat_kepedasan, kuah, topping, catatan_umum, is_ramen) "
+                            +
+                            "VALUES (?, ?, ?, ?, ?, ?)";
                     try (PreparedStatement ps = conn.prepareStatement(sqlKustomisasi)) {
                         ps.setString(1, kustomisasi.getIdKustomisasi());
                         ps.setInt(2, kustomisasi.getTingkatKepedasan());
@@ -89,8 +91,9 @@ public class TransactionRepository {
                 }
 
                 // Simpan invoice item
-                String sqlInvoice = "INSERT INTO invoice_items (id_invoice, id_order, id_menu, kuantitas, sub_total_item, id_kustomisasi) " +
-                                     "VALUES (?, ?, ?, ?, ?, ?)";
+                String sqlInvoice = "INSERT INTO invoice_items (id_invoice, id_order, id_menu, kuantitas, sub_total_item, id_kustomisasi) "
+                        +
+                        "VALUES (?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement ps = conn.prepareStatement(sqlInvoice)) {
                     ps.setString(1, item.getIdInvoice());
                     ps.setString(2, order.getIdOrder());
@@ -107,8 +110,9 @@ public class TransactionRepository {
             }
 
             // 3. INSERT ke tabel payments
-            String sqlPayment = "INSERT INTO payments (id_payment, id_order, metode, uang_bayar, kembalian, status, qris_transaction_id) " +
-                                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String sqlPayment = "INSERT INTO payments (id_payment, id_order, metode, uang_bayar, kembalian, status, qris_transaction_id) "
+                    +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(sqlPayment)) {
                 ps.setString(1, payment.getIdPayment());
                 ps.setString(2, order.getIdOrder());
@@ -147,6 +151,7 @@ public class TransactionRepository {
 
     /**
      * Mengambil riwayat transaksi dari database berdasarkan filter waktu.
+     * 
      * @param filter "today", "week", "month", "year", "all"
      * @return JSON array string
      */
@@ -183,25 +188,27 @@ public class TransactionRepository {
             }
 
             String sql = "SELECT t.id_order, t.tanggal_waktu, t.sub_total, t.diskon, t.total_bersih, " +
-                         "l.tipe_layanan, l.biaya_layanan, c.nama_pemesan " +
-                         "FROM transactions t " +
-                         "JOIN layanan l ON t.id_layanan = l.id_layanan " +
-                         "JOIN customers c ON t.id_customer = c.id_customer" +
-                         dateCondition +
-                         " ORDER BY t.tanggal_waktu DESC";
+                    "l.tipe_layanan, l.biaya_layanan, c.nama_pemesan " +
+                    "FROM transactions t " +
+                    "JOIN layanan l ON t.id_layanan = l.id_layanan " +
+                    "JOIN customers c ON t.id_customer = c.id_customer" +
+                    dateCondition +
+                    " ORDER BY t.tanggal_waktu DESC";
 
             try (PreparedStatement ps = conn.prepareStatement(sql);
-                 java.sql.ResultSet rs = ps.executeQuery()) {
+                    java.sql.ResultSet rs = ps.executeQuery()) {
 
                 boolean first = true;
                 while (rs.next()) {
-                    if (!first) sb.append(",");
+                    if (!first)
+                        sb.append(",");
                     first = false;
 
                     String orderId = rs.getString("id_order");
                     String date = rs.getTimestamp("tanggal_waktu").toString();
                     // Trim nanoseconds: "2026-06-10 17:00:00.0" -> "2026-06-10 17:00:00"
-                    if (date.contains(".")) date = date.substring(0, date.indexOf("."));
+                    if (date.contains("."))
+                        date = date.substring(0, date.indexOf("."));
                     double subTotal = rs.getDouble("sub_total");
                     double diskon = rs.getDouble("diskon");
                     double totalBersih = rs.getDouble("total_bersih");
@@ -211,8 +218,8 @@ public class TransactionRepository {
 
                     // Fetch invoice items for this order
                     String sqlItems = "SELECT m.nama_menu, ii.kuantitas, ii.sub_total_item " +
-                                      "FROM invoice_items ii JOIN menu m ON ii.id_menu = m.id_menu " +
-                                      "WHERE ii.id_order = ?";
+                            "FROM invoice_items ii JOIN menu m ON ii.id_menu = m.id_menu " +
+                            "WHERE ii.id_order = ?";
                     StringBuilder itemsSb = new StringBuilder();
                     itemsSb.append("[");
                     try (PreparedStatement ps2 = conn.prepareStatement(sqlItems)) {
@@ -220,25 +227,24 @@ public class TransactionRepository {
                         try (java.sql.ResultSet rs2 = ps2.executeQuery()) {
                             boolean firstItem = true;
                             while (rs2.next()) {
-                                if (!firstItem) itemsSb.append(",");
+                                if (!firstItem)
+                                    itemsSb.append(",");
                                 firstItem = false;
                                 itemsSb.append(String.format(
-                                    "{\"name\":\"%s\",\"qty\":%d,\"total\":%.0f}",
-                                    escapeJson(rs2.getString("nama_menu")),
-                                    rs2.getInt("kuantitas"),
-                                    rs2.getDouble("sub_total_item")
-                                ));
+                                        "{\"name\":\"%s\",\"qty\":%d,\"total\":%.0f}",
+                                        escapeJson(rs2.getString("nama_menu")),
+                                        rs2.getInt("kuantitas"),
+                                        rs2.getDouble("sub_total_item")));
                             }
                         }
                     }
                     itemsSb.append("]");
 
                     sb.append(String.format(
-                        "{\"orderId\":\"%s\",\"date\":\"%s\",\"customerName\":\"%s\",\"subtotal\":%.0f,\"service\":%.0f,\"serviceName\":\"%s\",\"discount\":%.0f,\"total\":%.0f,\"items\":%s}",
-                        escapeJson(orderId), escapeJson(date), escapeJson(customerName),
-                        subTotal, servicePrice, escapeJson(serviceName), diskon, totalBersih,
-                        itemsSb.toString()
-                    ));
+                            "{\"orderId\":\"%s\",\"date\":\"%s\",\"customerName\":\"%s\",\"subtotal\":%.0f,\"service\":%.0f,\"serviceName\":\"%s\",\"discount\":%.0f,\"total\":%.0f,\"items\":%s}",
+                            escapeJson(orderId), escapeJson(date), escapeJson(customerName),
+                            subTotal, servicePrice, escapeJson(serviceName), diskon, totalBersih,
+                            itemsSb.toString()));
                 }
             }
         } catch (SQLException e) {
@@ -251,7 +257,8 @@ public class TransactionRepository {
     }
 
     private String escapeJson(String s) {
-        if (s == null) return "";
+        if (s == null)
+            return "";
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
@@ -261,26 +268,27 @@ public class TransactionRepository {
      */
     private void saveToFile(Transaction_Order order, Payment payment) {
         try (FileWriter fw = new FileWriter(FILE_PATH, true);
-             PrintWriter pw = new PrintWriter(fw)) {
-            
+                PrintWriter pw = new PrintWriter(fw)) {
+
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
-            
+
             pw.println("==========================================");
             pw.println("TRANSAKSI: " + order.getIdOrder());
             pw.println("Waktu    : " + dtf.format(now));
-            pw.println("Pelanggan: " + order.getCustomer().getNamaPemesan() + " (" + order.getCustomer().getType() + ")");
-            pw.println("Layanan  : " + order.getLayanan().getTipeLayanan() + " (Rp " + order.getLayanan().getBiayaLayanan() + ")");
+            pw.println(
+                    "Pelanggan: " + order.getCustomer().getNamaPemesan() + " (" + order.getCustomer().getType() + ")");
+            pw.println("Layanan  : " + order.getLayanan().getTipeLayanan() + " (Rp "
+                    + order.getLayanan().getBiayaLayanan() + ")");
             pw.println("------------------------------------------");
-            
+
             for (Invoice item : order.getInvoiceItems()) {
-                pw.printf("%-20s x%-3d  Rp %,10.0f\n", 
-                    item.getMenu().getNamaMenu(), 
-                    item.getKuantitas(), 
-                    item.getSubTotalItem()
-                );
+                pw.printf("%-20s x%-3d  Rp %,10.0f\n",
+                        item.getMenu().getNamaMenu(),
+                        item.getKuantitas(),
+                        item.getSubTotalItem());
             }
-            
+
             pw.println("------------------------------------------");
             pw.printf("Subtotal   : Rp %,10.0f\n", order.getSubTotal());
             pw.printf("Diskon     : Rp %,10.0f\n", order.getDiskon());
@@ -291,7 +299,7 @@ public class TransactionRepository {
             pw.println("Status     : " + payment.getStatus());
             pw.println("==========================================");
             pw.println();
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }
