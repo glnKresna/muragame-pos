@@ -20,8 +20,8 @@ class DetailPesanan extends HTMLElement {
       </div>
       <div class="cart-footer">
         <div class="calc"><span>Sub total</span><span id="fSubtotal">Rp 0</span></div>
-        <div class="calc"><span id="fSvcLabel">Layanan (Dine In)</span><span id="fSvc">Rp 5.000</span></div>
-        <div class="calc disc"><span>Diskon member (10%)</span><span id="fDisc">– Rp 0</span></div>
+        <div class="calc"><span id="fSvcLabel">Layanan (Dine In)</span><span id="fSvc">Rp 0</span></div>
+        <div class="calc disc" style="display: none;"><span>Diskon member (10%)</span><span id="fDisc">– Rp 0</span></div>
         <div class="calc total"><span>Total bersih</span><span id="fTotal">Rp 0</span></div>
         <button class="pay-btn" id="payBtn" disabled onclick="goPayment()">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="1" y="4" width="14" height="10" rx="1.5"/><path d="M1 8h14M5 12h2"/></svg>

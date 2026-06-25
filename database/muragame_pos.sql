@@ -148,7 +148,7 @@ INSERT INTO customers (id_customer, nama_pemesan, tipe_customer, discount_rate) 
 -- Seed: Layanan
 -- -----------------------------------------------------------
 INSERT INTO layanan (id_layanan, tipe_layanan, biaya_layanan) VALUES
-('L001', 'Dine In', 5000.0),
+('L001', 'Dine In', 0.0),
 ('L002', 'Take Away', 2000.0),
 ('L003', 'Delivery', 15000.0);
 

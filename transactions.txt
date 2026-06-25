@@ -1,0 +1,17 @@
+==========================================
+TRANSAKSI: ORD-20260625-277
+Waktu    : 2026-06-25 22:49:27
+Pelanggan: Umum (Regular)
+Layanan  : Dine In (Rp 5000.0)
+------------------------------------------
+Paitan Tempura Ramen x1    Rp     42.000
+------------------------------------------
+Subtotal   : Rp     42.000
+Diskon     : Rp      5.000
+Total      : Rp     42.000
+Metode     : CASH
+Dibayar    : Rp     42.000
+Kembalian  : Rp          0
+Status     : LUNAS
+==========================================
+

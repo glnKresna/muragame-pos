@@ -14,12 +14,12 @@ class PopupPembayaran extends HTMLElement {
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
             <div>
-              <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:6px;">Nama Pelanggan (1 kata)</label>
+              <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:6px;">Nama Pelanggan</label>
               <input type="text" id="custNameInput" value="Umum" placeholder="Contoh: Budi" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:13px;">
             </div>
             <div>
-              <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:6px;">Diskon Manual (Rp)</label>
-              <input type="number" id="manualDiscInput" value="0" min="0" oninput="updatePaymentTotals()" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:13px;">
+              <label style="display:block; font-size:11px; color:var(--color-text-secondary); margin-bottom:6px;">Diskon</label>
+              <input type="number" id="manualDiscInput" value="0" min="0" max="100" oninput="updatePaymentTotals()" style="width:100%; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); background:var(--color-background-secondary); color:var(--color-text-primary); font-size:13px;">
             </div>
           </div>
           
@@ -115,15 +115,18 @@ var activeHistoryFilter = 'today';
 
 // Payment processing functions
 window.updatePaymentTotals = function() {
-  var discAmount = parseFloat(document.getElementById('manualDiscInput').value) || 0;
-  if (discAmount < 0) discAmount = 0;
-  
-  if (discAmount > originalTotalValue) {
-    discAmount = originalTotalValue;
-    document.getElementById('manualDiscInput').value = discAmount;
+  var discPercentage = parseFloat(document.getElementById('manualDiscInput').value) || 0;
+  if (discPercentage < 0) discPercentage = 0;
+  if (discPercentage > 100) {
+    discPercentage = 100;
+    document.getElementById('manualDiscInput').value = 100;
   }
   
-  discountedTotalValue = Math.max(0, originalTotalValue - discAmount);
+  var subtotalText = document.getElementById('fSubtotal') ? document.getElementById('fSubtotal').textContent : "0";
+  var subtotalVal = parseFloat(subtotalText.replace(/[^0-9]/g, '')) || 0;
+  var discRupiah = Math.round(subtotalVal * (discPercentage / 100));
+  
+  discountedTotalValue = Math.max(0, originalTotalValue - discRupiah);
   document.getElementById('modalTotal').textContent = fmt(discountedTotalValue);
   
   calcChange();
@@ -238,7 +241,8 @@ window.confirmPayment = function() {
     mockCart.forEach(function(item) {
       subtotal += item.price * item.qty;
     });
-    var total = subtotal > 0 ? (subtotal + mockSvcPrice - discountAmount) : 0;
+    var discRupiah = Math.round(subtotal * (discountAmount / 100));
+    var total = subtotal > 0 ? (subtotal + mockSvcPrice - discRupiah) : 0;
     if (total < 0) total = 0;
     
     var change = activePayMethod === 'CASH' ? (cashReceived - total) : 0;
@@ -262,7 +266,7 @@ window.confirmPayment = function() {
       customerName: custName,
       subtotal: subtotal,
       service: mockSvcPrice,
-      discount: discountAmount,
+      discount: discRupiah,
       total: total,
       method: activePayMethod,
       paid: activePayMethod === 'CASH' ? cashReceived : total,
@@ -277,7 +281,7 @@ window.confirmPayment = function() {
       subtotal: subtotal,
       service: mockSvcPrice,
       serviceName: mockSvcName,
-      discount: discountAmount,
+      discount: discRupiah,
       total: total,
       method: activePayMethod,
       paid: activePayMethod === 'CASH' ? cashReceived : total,

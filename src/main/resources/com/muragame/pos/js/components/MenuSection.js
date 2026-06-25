@@ -12,7 +12,7 @@ class MenuSection extends HTMLElement {
 
         <div class="sec-label">Pilih layanan</div>
         <div class="svc-row">
-          <div class="svc sel" onclick="selectSvc(this,'Dine In')"><div class="svc-name">Dine In</div><div class="svc-price">+Rp 5.000</div></div>
+          <div class="svc sel" onclick="selectSvc(this,'Dine In')"><div class="svc-name">Dine In</div><div class="svc-price">+Rp 0</div></div>
           <div class="svc" onclick="selectSvc(this,'Take Away')"><div class="svc-name">Take Away</div><div class="svc-price">+Rp 2.000</div></div>
           <div class="svc" onclick="selectSvc(this,'Delivery')"><div class="svc-name">Delivery</div><div class="svc-price">+Rp 15.000</div></div>
         </div>
@@ -108,7 +108,6 @@ window.renderMenus = function() {
     d.innerHTML = '<div class="mc-name">' + m.name + '</div>' + 
                   '<div class="mc-cat">' + m.cat.charAt(0).toUpperCase() + m.cat.slice(1) + '</div>' + 
                   '<div class="mc-price">' + fmt(m.price) + '</div>' + 
-                  '<span class="tag ' + m.tagClass + '">' + m.tag + '</span>' + 
                   badge;
     d.onclick = function(){ addItem(m) };
     g.appendChild(d);
@@ -132,7 +131,7 @@ window.selectSvc = function(el, name) {
     mockSvcName = name;
     if (name === 'Take Away') mockSvcPrice = 2000;
     else if (name === 'Delivery') mockSvcPrice = 15000;
-    else mockSvcPrice = 5000;
+    else mockSvcPrice = 0;
     syncMockCart();
   }
 };

@@ -13,7 +13,7 @@ public class RegularCustomer extends Customer implements IDiscountable {
 
     @Override
     public double hitungDiskon(double subTotal) {
-        return customDiscount;
+        return Math.round(subTotal * (customDiscount / 100.0));
     }
 
     @Override
@@ -23,6 +23,6 @@ public class RegularCustomer extends Customer implements IDiscountable {
 
     @Override
     public double getDiscountRate() {
-        return 0.0;
+        return customDiscount / 100.0;
     }
 }

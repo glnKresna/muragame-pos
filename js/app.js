@@ -12,7 +12,7 @@ var pastTransactionsList = [];
 // Mock system variables
 var mockCart = [];
 var mockSvcName = "Dine In";
-var mockSvcPrice = 5000;
+var mockSvcPrice = 0;
 var mockCustomerName = "Umum";
 var mockCustomerType = "Regular Customer";
 var mockDiscountRate = 0.00;
