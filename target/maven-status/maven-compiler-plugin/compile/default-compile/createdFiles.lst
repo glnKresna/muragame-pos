@@ -27,3 +27,4 @@ com\muragame\pos\model\Payment.class
 com\muragame\pos\model\CashPayment.class
 com\muragame\pos\model\RegularCustomer.class
 com\muragame\pos\model\DeliveryLayanan.class
+com\muragame\pos\repository\CashierRepository.class

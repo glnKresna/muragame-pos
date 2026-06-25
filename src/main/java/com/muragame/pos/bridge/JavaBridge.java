@@ -2,6 +2,7 @@ package com.muragame.pos.bridge;
 
 import com.muragame.pos.model.*;
 import com.muragame.pos.repository.TransactionRepository;
+import com.muragame.pos.repository.CashierRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,23 @@ public class JavaBridge {
     private Transaction_Order currentOrder;
     private History_Harian historyHarian;
     private TransactionRepository transactionRepository;
+    private Cashier activeCashier;
+    private List<Cashier> cashiers;
+    private CashierRepository cashierRepository;
 
     public JavaBridge() {
         this.transactionRepository = new TransactionRepository();
+        this.cashierRepository = new CashierRepository();
+        this.cashiers = this.cashierRepository.loadCashiers();
+        
+        // Sinkronisasi data kasir ke DB secara background/langsung saat start
+        this.cashierRepository.syncCashiersToDatabase(this.cashiers);
+        
+        // Tetapkan kasir default (kasir pertama) jika ada
+        if (!this.cashiers.isEmpty()) {
+            this.activeCashier = this.cashiers.get(0);
+        }
+        
         this.historyHarian = new History_Harian("HIST-" + DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now()));
         initializeMenus();
         startNewOrder();
@@ -93,6 +108,9 @@ public class JavaBridge {
         String nowStr = DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now());
         int rand = (int) (Math.random() * 900) + 100;
         this.currentOrder = new Transaction_Order("ORD-" + nowStr + "-" + rand);
+        if (this.activeCashier != null) {
+            this.currentOrder.setCashier(this.activeCashier);
+        }
     }
 
     public String getMenusJson() {
@@ -283,7 +301,7 @@ public class JavaBridge {
             itemsJson.append("]");
 
             String receiptJson = String.format(
-                "{\"success\":true,\"orderId\":\"%s\",\"date\":\"%s\",\"customerName\":\"%s\",\"subtotal\":%.0f,\"service\":%.0f,\"discount\":%.0f,\"total\":%.0f,\"method\":\"%s\",\"paid\":%.0f,\"change\":%.0f,\"qrisId\":\"%s\",\"items\":%s}",
+                "{\"success\":true,\"orderId\":\"%s\",\"date\":\"%s\",\"customerName\":\"%s\",\"subtotal\":%.0f,\"service\":%.0f,\"discount\":%.0f,\"total\":%.0f,\"method\":\"%s\",\"paid\":%.0f,\"change\":%.0f,\"qrisId\":\"%s\",\"cashierName\":\"%s\",\"items\":%s}",
                 escapeJson(currentOrder.getIdOrder()),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now()),
                 escapeJson(currentOrder.getCustomer().getNamaPemesan()),
@@ -295,6 +313,7 @@ public class JavaBridge {
                 payment.getUangBayar(),
                 payment.getKembalian(),
                 qrisId,
+                escapeJson(currentOrder.getCashier() != null ? currentOrder.getCashier().getNamaKasir() : "Ahmad Kasir"),
                 itemsJson.toString()
             );
 
@@ -328,7 +347,7 @@ public class JavaBridge {
             itemsSb.append("]");
 
             sb.append(String.format(
-                "{\"orderId\":\"%s\",\"date\":\"%s\",\"customerName\":\"%s\",\"subtotal\":%.0f,\"service\":%.0f,\"serviceName\":\"%s\",\"discount\":%.0f,\"total\":%.0f,\"items\":%s}",
+                "{\"orderId\":\"%s\",\"date\":\"%s\",\"customerName\":\"%s\",\"subtotal\":%.0f,\"service\":%.0f,\"serviceName\":\"%s\",\"discount\":%.0f,\"total\":%.0f,\"cashierName\":\"%s\",\"items\":%s}",
                 escapeJson(t.getIdOrder()),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(t.getTanggalWaktu().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()),
                 escapeJson(t.getCustomer().getNamaPemesan()),
@@ -337,6 +356,7 @@ public class JavaBridge {
                 escapeJson(t.getLayanan().getTipeLayanan()),
                 t.getDiskon(),
                 t.getTotalBersih(),
+                escapeJson(t.getCashier() != null ? t.getCashier().getNamaKasir() : "Ahmad Kasir"),
                 itemsSb.toString()
             ));
             if (i < transactions.size() - 1) {
@@ -345,6 +365,50 @@ public class JavaBridge {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    public String getCashiersJson() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < cashiers.size(); i++) {
+            Cashier c = cashiers.get(i);
+            sb.append(String.format(
+                "{\"id\":\"%s\",\"name\":\"%s\",\"shift\":\"%s\"}",
+                escapeJson(c.getIdKasir()), escapeJson(c.getNamaKasir()), escapeJson(c.getShift())
+            ));
+            if (i < cashiers.size() - 1) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public String loginCashier(String cashierName, String password) {
+        for (Cashier c : cashiers) {
+            if (c.getNamaKasir().equalsIgnoreCase(cashierName.trim())) {
+                if (c.login(password)) {
+                    this.activeCashier = c;
+                    if (this.currentOrder != null) {
+                        this.currentOrder.setCashier(c);
+                    }
+                    return String.format(
+                        "{\"success\":true,\"cashier\":{\"id\":\"%s\",\"name\":\"%s\",\"shift\":\"%s\"}}",
+                        escapeJson(c.getIdKasir()), escapeJson(c.getNamaKasir()), escapeJson(c.getShift())
+                    );
+                } else {
+                    return "{\"success\":false,\"message\":\"Password salah!\"}";
+                }
+            }
+        }
+        return "{\"success\":false,\"message\":\"Kasir tidak ditemukan!\"}";
+    }
+
+    public void logoutCashier() {
+        if (this.activeCashier != null) {
+            this.activeCashier.logout();
+            this.activeCashier = null;
+        }
     }
 
     public void exitApp() {

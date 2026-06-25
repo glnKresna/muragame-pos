@@ -139,3 +139,23 @@ Kembalian  : Rp          0
 Status     : LUNAS
 ==========================================
 
+==========================================
+TRANSAKSI: ORD-20260626-399
+Waktu    : 2026-06-26 06:37:04
+Kasir    : Amel Kasir (Pagi)
+Pelanggan: Cesna (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Paitan Beef Ramen    x1    Rp     45.000
+Miso Tori Ramen      x1    Rp     38.000
+Paitan Tempura Ramen x1    Rp     42.000
+------------------------------------------
+Subtotal   : Rp    125.000
+Diskon     : Rp          0
+Total      : Rp    125.000
+Metode     : CASH
+Dibayar    : Rp    125.000
+Kembalian  : Rp          0
+Status     : LUNAS
+==========================================
+

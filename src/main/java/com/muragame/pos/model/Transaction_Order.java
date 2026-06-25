@@ -13,6 +13,7 @@ public class Transaction_Order {
     private List<Invoice> invoiceItems;
     private Customer customer;
     private Layanan layanan;
+    private Cashier cashier;
 
     public Transaction_Order(String idOrder) {
         this.idOrder = idOrder;
@@ -21,6 +22,7 @@ public class Transaction_Order {
         // Default customer: RegularCustomer Umum
         this.customer = new RegularCustomer("C-DEFAULT", "Umum");
         this.layanan = new DineInLayanan();
+        this.cashier = null;
         recalculate();
     }
 
@@ -72,6 +74,14 @@ public class Transaction_Order {
     public void setLayanan(Layanan layanan) {
         this.layanan = layanan;
         recalculate();
+    }
+
+    public Cashier getCashier() {
+        return cashier;
+    }
+
+    public void setCashier(Cashier cashier) {
+        this.cashier = cashier;
     }
 
     public void addInvoiceItem(Invoice item) {

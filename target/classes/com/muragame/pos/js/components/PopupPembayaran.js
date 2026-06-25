@@ -76,7 +76,7 @@ class PopupPembayaran extends HTMLElement {
           <div style="font-size:10px; margin-bottom:10px; line-height:1.4;">
             <div style="display:flex; justify-content:space-between;"><span>Order ID:</span><span id="rOrderId">ORD-XXXX</span></div>
             <div style="display:flex; justify-content:space-between;"><span>Waktu   :</span><span id="rDate">2026-06-08</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>Kasir   :</span><span>Ahmad Kasir</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Kasir   :</span><span id="rCashier">Ahmad Kasir</span></div>
             <div style="display:flex; justify-content:space-between;"><span>Pelanggan:</span><span id="rCustomer">Budi Santoso</span></div>
           </div>
           <div style="border-bottom:1px dashed #333; margin-bottom:10px;"></div>
@@ -269,6 +269,7 @@ window.confirmPayment = function () {
       method: activePayMethod,
       paid: activePayMethod === 'CASH' ? cashReceived : total,
       change: change,
+      cashierName: activeCashier ? activeCashier.name : 'Ahmad Kasir',
       items: txItems
     };
 
@@ -284,6 +285,7 @@ window.confirmPayment = function () {
       method: activePayMethod,
       paid: activePayMethod === 'CASH' ? cashReceived : total,
       change: change,
+      cashierName: activeCashier ? activeCashier.name : 'Ahmad Kasir',
       items: txItems
     });
 
@@ -297,6 +299,7 @@ window.confirmPayment = function () {
 window.showReceipt = function (data) {
   document.getElementById('rOrderId').textContent = data.orderId;
   document.getElementById('rDate').textContent = data.date;
+  document.getElementById('rCashier').textContent = data.cashierName || (activeCashier ? activeCashier.name : 'Ahmad Kasir');
   document.getElementById('rCustomer').textContent = data.customerName;
   document.getElementById('rSubtotal').textContent = fmt(data.subtotal);
   document.getElementById('rSvc').textContent = fmt(data.service);
@@ -395,6 +398,7 @@ window.reprintStruk = function (index) {
     method: tx.method || 'CASH',
     paid: tx.paid || tx.total,
     change: tx.change || 0,
+    cashierName: tx.cashierName || 'Ahmad Kasir',
     items: tx.items
   };
 

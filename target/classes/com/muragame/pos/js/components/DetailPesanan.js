@@ -13,7 +13,7 @@ class DetailPesanan extends HTMLElement {
       </div>
       <div class="cart-footer">
         <div class="calc"><span>Sub total</span><span id="fSubtotal">Rp 0</span></div>
-        <div class="calc"><span id="fSvcLabel">Layanan (Dine In)</span><span id="fSvc">Rp 0</span></div>
+        <div class="calc"><span id="fSvcLabel">Layanan</span><span id="fSvc">Rp 0</span></div>
         <div class="calc disc" style="display: none;"><span>Diskon member (10%)</span><span id="fDisc">– Rp 0</span></div>
         <div class="calc total"><span>Total bersih</span><span id="fTotal">Rp 0</span></div>
         <button class="pay-btn" id="payBtn" disabled onclick="goPayment()">

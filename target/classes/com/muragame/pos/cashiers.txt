@@ -1,0 +1,4 @@
+K001;Ahmad Kasir;123;Pagi
+K002;Reva Kasir;123;Siang
+K003;Asep Kasir;123;Malam
+K004;Amel Kasir;123;Pagi

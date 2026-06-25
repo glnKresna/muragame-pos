@@ -14,7 +14,33 @@
 </head>
 <body>
 
-<div class="app">
+<!-- HALAMAN LOGIN KASIR -->
+<div id="loginScreen" class="login-container">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-text">MURAGAME RESTO</div>
+      <div class="logo-sub">Point of Sale Login Portal</div>
+    </div>
+    
+    <div class="login-form">
+      <div class="form-group">
+        <label for="cashierNameInput">Masukkan nama</label>
+        <input type="text" id="cashierNameInput" placeholder="Nama Kasir" class="login-input">
+      </div>
+      
+      <div class="form-group">
+        <label for="loginPassword">Masukkan password</label>
+        <input type="password" id="loginPassword" placeholder="Password" class="login-input">
+      </div>
+      
+      <div id="loginError" class="login-error" style="display: none;">Password salah!</div>
+      
+      <button class="login-btn" onclick="submitLogin()">Buka Sesi Kasir</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" style="display:none;">
   <sidebar-kiri></sidebar-kiri>
 
   <div class="topbar">

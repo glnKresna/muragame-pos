@@ -9,6 +9,16 @@ var selectedKuahVal = 'Shoyu';
 var selectedPedasVal = 0;
 var pastTransactionsList = [];
 
+// Cashier state & hardcoded data
+var cashiers = [];
+var activeCashier = null;
+var hardcodedCashiers = [
+  { id: "K001", name: "Ahmad Kasir", password: "123", shift: "Pagi" },
+  { id: "K002", name: "Reva Kasir", password: "123", shift: "Siang" },
+  { id: "K003", name: "Asep Kasir", password: "123", shift: "Malam" },
+  { id: "K004", name: "Amel Kasir", password: "123", shift: "Pagi" }
+];
+
 // Mock system variables
 var mockCart = [];
 var mockSvcName = "Dine In";
@@ -24,6 +34,90 @@ function fmt(n) {
   return 'Rp ' + Math.round(n).toLocaleString('id-ID');
 }
 
+// populateCashierSelect is deprecated
+
+window.submitLogin = function () {
+  var nameInput = document.getElementById('cashierNameInput');
+  var passInput = document.getElementById('loginPassword');
+  var errDiv = document.getElementById('loginError');
+
+  if (!nameInput || !passInput || !errDiv) return;
+
+  var name = nameInput.value.trim();
+  var pass = passInput.value;
+
+  if (!name) {
+    errDiv.textContent = 'Silakan masukkan nama kasir!';
+    errDiv.style.display = 'block';
+    return;
+  }
+  if (!pass) {
+    errDiv.textContent = 'Silakan masukkan password!';
+    errDiv.style.display = 'block';
+    return;
+  }
+
+  if (window.javaApp) {
+    var responseRaw = window.javaApp.loginCashier(name, pass);
+    var response = JSON.parse(responseRaw);
+    if (response.success) {
+      activeCashier = response.cashier;
+      enterApp();
+    } else {
+      errDiv.textContent = response.message;
+      errDiv.style.display = 'block';
+    }
+  } else {
+    var enteredName = name.toLowerCase();
+    var c = cashiers.find(function (x) { return x.name.toLowerCase() === enteredName; });
+    if (c && c.password === pass) {
+      activeCashier = c;
+      enterApp();
+    } else if (c) {
+      errDiv.textContent = 'Password salah!';
+      errDiv.style.display = 'block';
+    } else {
+      errDiv.textContent = 'Kasir tidak ditemukan!';
+      errDiv.style.display = 'block';
+    }
+  }
+};
+
+function enterApp() {
+  if (!activeCashier) return;
+
+  document.querySelector('.kasir-name').textContent = activeCashier.name;
+  document.getElementById('shiftLabel').textContent = 'Shift ' + activeCashier.shift;
+  
+  var initials = activeCashier.name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase();
+  if (initials.length > 2) initials = initials.substring(0, 2);
+  document.querySelector('.avatar').textContent = initials;
+
+  document.getElementById('loginScreen').style.display = 'none';
+  document.querySelector('.app').style.display = 'grid';
+
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  
+  if (window.javaApp) {
+    syncWithJava();
+  } else {
+    syncMockCart();
+  }
+}
+
+window.logout = function () {
+  if (window.javaApp) {
+    window.javaApp.logoutCashier();
+  }
+  activeCashier = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.querySelector('.app').style.display = 'none';
+  document.getElementById('cashierNameInput').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').style.display = 'none';
+};
+
 // Java integration loader / Mock initializer
 function initApp() {
   if (isInitialized) return;
@@ -35,14 +129,12 @@ function initApp() {
       var menusRaw = window.javaApp.getMenusJson();
       menus = JSON.parse(menusRaw);
 
-      // 2. Fetch shift & date info
-      var h = new Date().getHours();
-      var s = h >= 6 && h < 14 ? 'Shift Pagi' : h >= 14 && h < 21 ? 'Shift Siang' : 'Shift Malam';
-      document.getElementById('shiftLabel').textContent = s;
-      document.getElementById('orderId').textContent = window.javaApp.getOrderId();
+      // 2. Fetch cashiers from Java
+      var cashiersRaw = window.javaApp.getCashiersJson();
+      cashiers = JSON.parse(cashiersRaw);
 
-      // 3. Sync and render
-      syncWithJava();
+      // 3. Set order ID
+      document.getElementById('orderId').textContent = window.javaApp.getOrderId();
     } catch (err) {
       console.error("Java integration error: ", err);
     }
@@ -68,12 +160,9 @@ function initApp() {
       { "id": "M016", "name": "Karaage", "cat": "snack", "price": 25000, "tag": "Crispy", "tagClass": "tag-s", "detail": "Chicken · Mayo sauce" },
       { "id": "M017", "name": "Takoyaki (6)", "cat": "snack", "price": 23000, "tag": "Hangat", "tagClass": "tag-s", "detail": "Octopus · Bonito" }
     ];
-    var h = new Date().getHours();
-    var s = h >= 6 && h < 14 ? 'Shift Pagi' : h >= 14 && h < 21 ? 'Shift Siang' : 'Shift Malam';
-    document.getElementById('shiftLabel').textContent = s;
-    document.getElementById('orderId').textContent = "ORD-MOCK-100";
+    cashiers = hardcodedCashiers;
 
-    syncMockCart();
+    document.getElementById('orderId').textContent = "ORD-MOCK-100";
   }
 }
 
@@ -141,7 +230,7 @@ function syncWithJava() {
   }
 
   document.getElementById('fSubtotal').textContent = fmt(summary.subtotal);
-  document.getElementById('fSvcLabel').textContent = 'Layanan (' + summary.svcName + ')';
+  document.getElementById('fSvcLabel').textContent = 'Layanan';
   document.getElementById('fSvc').textContent = fmt(summary.svcPrice);
   document.getElementById('fDisc').textContent = '– ' + fmt(summary.discount);
   document.getElementById('fTotal').textContent = fmt(summary.total);
@@ -205,7 +294,7 @@ function syncMockCart() {
   }
 
   document.getElementById('fSubtotal').textContent = fmt(subtotal);
-  document.getElementById('fSvcLabel').textContent = 'Layanan (' + mockSvcName + ')';
+  document.getElementById('fSvcLabel').textContent = 'Layanan';
   document.getElementById('fSvc').textContent = fmt(mockSvcPrice);
   document.getElementById('fDisc').textContent = '– ' + fmt(discount);
   document.getElementById('fTotal').textContent = fmt(total);

@@ -131,10 +131,4 @@ window.switchView = function(view) {
   }
 };
 
-window.logout = function() {
-  if (window.javaApp) {
-    window.javaApp.exitApp();
-  } else {
-    window.close();
-  }
-};
+// window.logout is handled in app.js

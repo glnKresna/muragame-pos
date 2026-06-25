@@ -64,7 +64,13 @@ public class TransactionRepository {
                 ps.setString(1, order.getIdOrder());
                 ps.setString(2, order.getCustomer().getIdCustomer());
                 ps.setString(3, order.getLayanan().getIdLayanan());
-                ps.setString(4, "K001"); // Default kasir
+                
+                String cashierId = "K001"; // Fallback
+                if (order.getCashier() != null) {
+                    cashierId = order.getCashier().getIdKasir();
+                }
+                ps.setString(4, cashierId);
+                
                 ps.setDouble(5, order.getSubTotal());
                 ps.setDouble(6, order.getDiskon());
                 ps.setDouble(7, order.getTotalBersih());
@@ -188,10 +194,11 @@ public class TransactionRepository {
             }
 
             String sql = "SELECT t.id_order, t.tanggal_waktu, t.sub_total, t.diskon, t.total_bersih, " +
-                    "l.tipe_layanan, l.biaya_layanan, c.nama_pemesan " +
+                    "l.tipe_layanan, l.biaya_layanan, c.nama_pemesan, k.nama_kasir " +
                     "FROM transactions t " +
                     "JOIN layanan l ON t.id_layanan = l.id_layanan " +
-                    "JOIN customers c ON t.id_customer = c.id_customer" +
+                    "JOIN customers c ON t.id_customer = c.id_customer " +
+                    "LEFT JOIN cashiers k ON t.id_kasir = k.id_kasir" +
                     dateCondition +
                     " ORDER BY t.tanggal_waktu DESC";
 
@@ -215,6 +222,8 @@ public class TransactionRepository {
                     String serviceName = rs.getString("tipe_layanan");
                     double servicePrice = rs.getDouble("biaya_layanan");
                     String customerName = rs.getString("nama_pemesan");
+                    String cashierName = rs.getString("nama_kasir");
+                    if (cashierName == null) cashierName = "Ahmad Kasir";
 
                     // Fetch invoice items for this order
                     String sqlItems = "SELECT m.nama_menu, ii.kuantitas, ii.sub_total_item " +
@@ -241,10 +250,10 @@ public class TransactionRepository {
                     itemsSb.append("]");
 
                     sb.append(String.format(
-                            "{\"orderId\":\"%s\",\"date\":\"%s\",\"customerName\":\"%s\",\"subtotal\":%.0f,\"service\":%.0f,\"serviceName\":\"%s\",\"discount\":%.0f,\"total\":%.0f,\"items\":%s}",
+                            "{\"orderId\":\"%s\",\"date\":\"%s\",\"customerName\":\"%s\",\"subtotal\":%.0f,\"service\":%.0f,\"serviceName\":\"%s\",\"discount\":%.0f,\"total\":%.0f,\"cashierName\":\"%s\",\"items\":%s}",
                             escapeJson(orderId), escapeJson(date), escapeJson(customerName),
                             subTotal, servicePrice, escapeJson(serviceName), diskon, totalBersih,
-                            itemsSb.toString()));
+                            escapeJson(cashierName), itemsSb.toString()));
                 }
             }
         } catch (SQLException e) {
@@ -276,6 +285,11 @@ public class TransactionRepository {
             pw.println("==========================================");
             pw.println("TRANSAKSI: " + order.getIdOrder());
             pw.println("Waktu    : " + dtf.format(now));
+            if (order.getCashier() != null) {
+                pw.println("Kasir    : " + order.getCashier().getNamaKasir() + " (" + order.getCashier().getShift() + ")");
+            } else {
+                pw.println("Kasir    : Ahmad Kasir (Shift Pagi)");
+            }
             pw.println(
                     "Pelanggan: " + order.getCustomer().getNamaPemesan() + " (" + order.getCustomer().getType() + ")");
             pw.println("Layanan  : " + order.getLayanan().getTipeLayanan() + " (Rp "
