@@ -32,3 +32,57 @@ class DetailPesanan extends HTMLElement {
   }
 }
 customElements.define('detail-pesanan', DetailPesanan);
+
+// Functions related to cart / order items manipulation
+window.addItem = function(m) {
+  if (m.cat === 'ramen') {
+    openCustomizationModal(m);
+  } else {
+    if (window.javaApp) {
+      window.javaApp.addItem(m.id);
+      syncWithJava();
+    } else {
+      var found = false;
+      for (var i = 0; i < mockCart.length; i++) {
+        if (mockCart[i].menuId === m.id && mockCart[i].detail === (m.detail || "")) {
+          mockCart[i].qty++;
+          mockCart[i].lineTotal = mockCart[i].qty * mockCart[i].price;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        var invoiceId = "INV-MOCK-" + Date.now() + "-" + Math.floor(Math.random()*1000);
+        mockCart.push({
+          invoiceId: invoiceId,
+          menuId: m.id,
+          name: m.name,
+          price: m.price,
+          qty: 1,
+          lineTotal: m.price,
+          detail: m.detail || ""
+        });
+      }
+      syncMockCart();
+    }
+  }
+};
+
+window.changeQty = function(invoiceId, delta) {
+  if (window.javaApp) {
+    window.javaApp.changeQty(invoiceId, delta);
+    syncWithJava();
+  } else {
+    for (var i = 0; i < mockCart.length; i++) {
+      if (mockCart[i].invoiceId === invoiceId) {
+        mockCart[i].qty += delta;
+        mockCart[i].lineTotal = mockCart[i].qty * mockCart[i].price;
+        if (mockCart[i].qty <= 0) {
+          mockCart.splice(i, 1);
+        }
+        break;
+      }
+    }
+    syncMockCart();
+  }
+};

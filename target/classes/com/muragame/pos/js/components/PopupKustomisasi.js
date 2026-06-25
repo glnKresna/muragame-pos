@@ -51,3 +51,111 @@ class PopupKustomisasi extends HTMLElement {
   }
 }
 customElements.define('popup-kustomisasi', PopupKustomisasi);
+
+// Functions related to Ramen Customization Modal
+window.openCustomizationModal = function(m) {
+  document.getElementById('custMenuId').value = m.id;
+  document.getElementById('custModalTitle').textContent = 'Kustomisasi ' + m.name;
+  
+  selectedKuahVal = 'Shoyu';
+  selectedPedasVal = 0;
+  
+  var kuahOpts = document.querySelectorAll('.kuah-opt');
+  if (kuahOpts.length > 0) {
+    kuahOpts.forEach(function(el) {
+      el.classList.remove('sel');
+    });
+    kuahOpts[0].classList.add('sel');
+  }
+  
+  selectPedas(0);
+  
+  var cbs = document.querySelectorAll('.topping-cb');
+  cbs.forEach(function(cb) {
+    if (cb.value === 'Chashu' || cb.value === 'Tamago' || cb.value === 'Nori') {
+      cb.checked = true;
+    } else {
+      cb.checked = false;
+    }
+  });
+  
+  document.getElementById('custNotes').value = '';
+  document.getElementById('customizationModal').style.display = 'flex';
+};
+
+window.closeCustomizationModal = function() {
+  document.getElementById('customizationModal').style.display = 'none';
+};
+
+window.selectKuah = function(el, kuah) {
+  document.querySelectorAll('.kuah-opt').forEach(function(o){o.classList.remove('sel')});
+  el.classList.add('sel');
+  selectedKuahVal = kuah;
+};
+
+window.selectPedas = function(level) {
+  selectedPedasVal = level;
+  document.querySelectorAll('.pedas-btn').forEach(function(btn, i) {
+    if (i === level) {
+      btn.classList.add('active-pedas');
+    } else {
+      btn.classList.remove('active-pedas');
+    }
+  });
+};
+
+window.confirmCustomization = function() {
+  var menuId = document.getElementById('custMenuId').value;
+  var menuObj = menus.find(function(m){return m.id === menuId});
+  if (!menuObj) return;
+  
+  var toppings = [];
+  document.querySelectorAll('.topping-cb').forEach(function(cb) {
+    if (cb.checked) toppings.push(cb.value);
+  });
+  var toppingStr = toppings.join(', ');
+  
+  var notes = document.getElementById('custNotes').value;
+  
+  if (window.javaApp) {
+    window.javaApp.addRamenWithCustomization(menuId, selectedPedasVal, toppingStr, notes);
+    closeCustomizationModal();
+    syncWithJava();
+  } else {
+    var kuah = "Original";
+    var nameLower = menuObj.name.toLowerCase();
+    if (nameLower.indexOf("shio") !== -1) kuah = "Shio";
+    else if (nameLower.indexOf("shoyu") !== -1) kuah = "Shoyu";
+    else if (nameLower.indexOf("miso") !== -1) kuah = "Miso";
+    else if (nameLower.indexOf("paitan") !== -1) kuah = "Paitan";
+    
+    var detailParts = ["Kuah: " + kuah, "Pedas " + selectedPedasVal];
+    if (toppingStr.trim() !== "") detailParts.push("Topping: " + toppingStr);
+    if (notes.trim() !== "") detailParts.push("(" + notes + ")");
+    var detailStr = detailParts.join(" · ");
+    
+    var found = false;
+    for (var i = 0; i < mockCart.length; i++) {
+      if (mockCart[i].menuId === menuId && mockCart[i].detail === detailStr) {
+        mockCart[i].qty++;
+        mockCart[i].lineTotal = mockCart[i].qty * mockCart[i].price;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      var invoiceId = "INV-MOCK-" + Date.now() + "-" + Math.floor(Math.random()*1000);
+      mockCart.push({
+        invoiceId: invoiceId,
+        menuId: menuId,
+        name: menuObj.name,
+        price: menuObj.price,
+        qty: 1,
+        lineTotal: menuObj.price,
+        detail: detailStr
+      });
+    }
+    closeCustomizationModal();
+    syncMockCart();
+  }
+};
