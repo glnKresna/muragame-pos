@@ -21,6 +21,7 @@ com\muragame\pos\model\DineInLayanan.class
 com\muragame\pos\repository\TransactionRepository.class
 com\muragame\pos\bridge\JavaBridge.class
 com\muragame\pos\model\Menu.class
+com\muragame\pos\repository\MenuRepository.class
 com\muragame\pos\App.class
 com\muragame\pos\Main.class
 com\muragame\pos\model\Payment.class

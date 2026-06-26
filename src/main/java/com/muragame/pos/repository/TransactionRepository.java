@@ -56,6 +56,19 @@ public class TransactionRepository {
             // Mulai transaction
             conn.setAutoCommit(false);
 
+            // 0. INSERT customer ke tabel customers terlebih dahulu agar FK constraint terpenuhi.
+            //    Customer dibuat dinamis saat transaksi (ID: C-<timestamp>), sehingga belum ada di DB.
+            //    INSERT IGNORE: jika sudah ada, tidak akan error.
+            String sqlCustomer = "INSERT IGNORE INTO customers (id_customer, nama_pemesan, tipe_customer, discount_rate) "
+                    + "VALUES (?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sqlCustomer)) {
+                ps.setString(1, order.getCustomer().getIdCustomer());
+                ps.setString(2, order.getCustomer().getNamaPemesan());
+                ps.setString(3, order.getCustomer().getType());
+                ps.setDouble(4, order.getCustomer().getDiscountRate());
+                ps.executeUpdate();
+            }
+
             // 1. INSERT ke tabel transactions
             String sqlTransaction = "INSERT INTO transactions (id_order, tanggal_waktu, id_customer, id_layanan, id_kasir, sub_total, diskon, total_bersih) "
                     +
@@ -65,8 +78,8 @@ public class TransactionRepository {
                 ps.setString(2, order.getCustomer().getIdCustomer());
                 ps.setString(3, order.getLayanan().getIdLayanan());
                 
-                String cashierId = "K001"; // Fallback
-                if (order.getCashier() != null) {
+                String cashierId = "K001"; // Fallback default
+                if (order.getCashier() != null && order.getCashier().getIdKasir() != null && !order.getCashier().getIdKasir().isEmpty()) {
                     cashierId = order.getCashier().getIdKasir();
                 }
                 ps.setString(4, cashierId);

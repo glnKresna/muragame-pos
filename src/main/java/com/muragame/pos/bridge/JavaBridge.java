@@ -3,6 +3,7 @@ package com.muragame.pos.bridge;
 import com.muragame.pos.model.*;
 import com.muragame.pos.repository.TransactionRepository;
 import com.muragame.pos.repository.CashierRepository;
+import com.muragame.pos.repository.MenuRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,91 +18,80 @@ public class JavaBridge {
     private Cashier activeCashier;
     private List<Cashier> cashiers;
     private CashierRepository cashierRepository;
+    private MenuRepository menuRepository;
 
     public JavaBridge() {
         this.transactionRepository = new TransactionRepository();
-        this.cashierRepository = new CashierRepository();
+        this.cashierRepository    = new CashierRepository();
+        this.menuRepository       = new MenuRepository();
+
+        // Muat kasir: prioritas dari DB, fallback ke file
         this.cashiers = this.cashierRepository.loadCashiers();
-        
-        // Sinkronisasi data kasir ke DB secara background/langsung saat start
-        this.cashierRepository.syncCashiersToDatabase(this.cashiers);
-        
+
+        // Jika kasir dimuat dari file (DB kosong), sync ke DB
+        List<Cashier> fromDb = this.cashierRepository.loadCashiersFromDatabase();
+        if (fromDb.isEmpty() && !this.cashiers.isEmpty()) {
+            this.cashierRepository.syncCashiersToDatabase(this.cashiers);
+            // Reload dari DB setelah sync
+            List<Cashier> synced = this.cashierRepository.loadCashiersFromDatabase();
+            if (!synced.isEmpty()) this.cashiers = synced;
+        }
+
         // Tetapkan kasir default (kasir pertama) jika ada
         if (!this.cashiers.isEmpty()) {
             this.activeCashier = this.cashiers.get(0);
         }
-        
+
         this.historyHarian = new History_Harian("HIST-" + DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now()));
         initializeMenus();
         startNewOrder();
     }
 
     private void initializeMenus() {
-        menus = new ArrayList<>();
-        
-        boolean loadedFromDb = loadMenusFromDatabase();
-        if (!loadedFromDb || menus.isEmpty()) {
-            System.out.println("[DB] Menggunakan menu default (fallback) karena database kosong/gagal koneksi.");
-            menus.clear();
-            // 12 Ramen Menus (M001 - M012)
-            menus.add(new RamenMenu("M001", "Shio Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
-            menus.add(new RamenMenu("M002", "Shoyu Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
-            menus.add(new RamenMenu("M003", "Miso Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
-            menus.add(new RamenMenu("M004", "Paitan Tori Ramen", 38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori"));
-            
-            menus.add(new RamenMenu("M005", "Shio Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
-            menus.add(new RamenMenu("M006", "Shoyu Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
-            menus.add(new RamenMenu("M007", "Miso Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
-            menus.add(new RamenMenu("M008", "Paitan Beef Ramen", 45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori", "Beef Slices · Tamago · Nori"));
-            
-            menus.add(new RamenMenu("M009", "Shio Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
-            menus.add(new RamenMenu("M010", "Shoyu Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
-            menus.add(new RamenMenu("M011", "Miso Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
-            menus.add(new RamenMenu("M012", "Paitan Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori", "Tempura · Tamago · Nori"));
-            
-            // 5 General Menus (M013 - M017)
-            menus.add(new GeneralMenu("M013", "Es Matcha Latte", 22000, "minuman", true, "Less sugar available"));
-            menus.add(new GeneralMenu("M014", "Es Teh Tarik", 15000, "minuman", true, "Creamy blend"));
-            menus.add(new GeneralMenu("M015", "Gyoza (6 pcs)", 28000, "snack", false, "Pork Filling"));
-            menus.add(new GeneralMenu("M016", "Karaage", 25000, "snack", false, "Chicken · Mayo sauce"));
-            menus.add(new GeneralMenu("M017", "Takoyaki (6)", 23000, "snack", false, "Octopus · Bonito"));
+        // Buat daftar menu default (digunakan sebagai fallback atau untuk sync ke DB)
+        List<Menu> defaultMenus = buildDefaultMenus();
+
+        // Coba muat dari database terlebih dahulu
+        List<Menu> fromDb = menuRepository.loadMenusFromDatabase();
+
+        if (!fromDb.isEmpty()) {
+            menus = fromDb;
+            System.out.println("[Bridge] Menu dimuat dari database: " + menus.size() + " item.");
+        } else {
+            System.out.println("[Bridge] DB kosong/offline, sync menu default ke database...");
+            menuRepository.syncDefaultMenusToDatabase(defaultMenus);
+            // Coba muat lagi dari DB setelah sync
+            List<Menu> afterSync = menuRepository.loadMenusFromDatabase();
+            menus = afterSync.isEmpty() ? defaultMenus : afterSync;
+            System.out.println("[Bridge] Menu aktif: " + menus.size() + " item.");
         }
     }
 
-    private boolean loadMenusFromDatabase() {
-        try {
-            java.sql.Connection conn = com.muragame.pos.database.DatabaseConnection.getInstance().getConnection();
-            if (conn == null) return false;
-            
-            String sql = "SELECT * FROM menu ORDER BY id_menu";
-            try (java.sql.PreparedStatement ps = conn.prepareStatement(sql);
-                 java.sql.ResultSet rs = ps.executeQuery()) {
-                
-                while (rs.next()) {
-                    String id = rs.getString("id_menu");
-                    String nama = rs.getString("nama_menu");
-                    double harga = rs.getDouble("harga");
-                    String kategori = rs.getString("kategori");
-                    String tipe = rs.getString("tipe_menu");
-                    
-                    if ("ramen".equalsIgnoreCase(tipe)) {
-                        int pedas = rs.getInt("tingkat_kepedasan");
-                        String tekstur = rs.getString("tekstur_mi");
-                        String topping = rs.getString("topping_tambahan");
-                        String detail = rs.getString("detail_khusus");
-                        menus.add(new RamenMenu(id, nama, harga, kategori, pedas, tekstur, topping, detail));
-                    } else {
-                        boolean isCold = rs.getBoolean("is_cold");
-                        String detail = rs.getString("detail_khusus");
-                        menus.add(new GeneralMenu(id, nama, harga, kategori, isCold, detail));
-                    }
-                }
-                return true;
-            }
-        } catch (java.sql.SQLException e) {
-            System.err.println("[DB] Gagal meload menu dari DB: " + e.getMessage());
-            return false;
-        }
+    /**
+     * Membuat daftar menu default (hardcoded) sebagai fallback offline dan seed awal DB.
+     */
+    private List<Menu> buildDefaultMenus() {
+        List<Menu> list = new ArrayList<>();
+        // 12 Ramen Menus (M001 - M012)
+        list.add(new RamenMenu("M001", "Shio Tori Ramen",    38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori",       "Chashu · Tamago · Nori"));
+        list.add(new RamenMenu("M002", "Shoyu Tori Ramen",   38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori",       "Chashu · Tamago · Nori"));
+        list.add(new RamenMenu("M003", "Miso Tori Ramen",    38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori",       "Chashu · Tamago · Nori"));
+        list.add(new RamenMenu("M004", "Paitan Tori Ramen",  38000, "ramen", 0, "Sedang", "Chashu, Tamago, Nori",       "Chashu · Tamago · Nori"));
+        list.add(new RamenMenu("M005", "Shio Beef Ramen",    45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori",  "Beef Slices · Tamago · Nori"));
+        list.add(new RamenMenu("M006", "Shoyu Beef Ramen",   45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori",  "Beef Slices · Tamago · Nori"));
+        list.add(new RamenMenu("M007", "Miso Beef Ramen",    45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori",  "Beef Slices · Tamago · Nori"));
+        list.add(new RamenMenu("M008", "Paitan Beef Ramen",  45000, "ramen", 0, "Sedang", "Beef Slices, Tamago, Nori",  "Beef Slices · Tamago · Nori"));
+        list.add(new RamenMenu("M009", "Shio Tempura Ramen",   42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori",   "Tempura · Tamago · Nori"));
+        list.add(new RamenMenu("M010", "Shoyu Tempura Ramen",  42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori",   "Tempura · Tamago · Nori"));
+        list.add(new RamenMenu("M011", "Miso Tempura Ramen",   42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori",   "Tempura · Tamago · Nori"));
+        list.add(new RamenMenu("M012", "Paitan Tempura Ramen", 42000, "ramen", 0, "Sedang", "Tempura, Tamago, Nori",   "Tempura · Tamago · Nori"));
+        // 5 General Menus (M013 - M017)
+        list.add(new GeneralMenu("M013", "Es Matcha Latte", 22000, "minuman", true,  "Less sugar available"));
+        list.add(new GeneralMenu("M014", "Es Teh Tarik",    15000, "minuman", true,  "Creamy blend"));
+        list.add(new GeneralMenu("M015", "Gyoza (6 pcs)",   28000, "snack",   false, "Pork Filling"));
+        list.add(new GeneralMenu("M016", "Karaage",         25000, "snack",   false, "Chicken · Mayo sauce"));
+        list.add(new GeneralMenu("M017", "Takoyaki (6)",    23000, "snack",   false, "Octopus · Bonito"));
+        return list;
     }
 
     public void startNewOrder() {
@@ -385,6 +375,31 @@ public class JavaBridge {
     }
 
     public String loginCashier(String cashierName, String password) {
+        // Prioritas: verifikasi langsung ke database MySQL
+        Cashier dbCashier = cashierRepository.verifyLoginFromDatabase(cashierName, password);
+        if (dbCashier != null) {
+            dbCashier.setActive(true);
+            this.activeCashier = dbCashier;
+            // Perbarui list kasir di memori jika kasir belum ada
+            boolean found = false;
+            for (int i = 0; i < cashiers.size(); i++) {
+                if (cashiers.get(i).getIdKasir().equals(dbCashier.getIdKasir())) {
+                    cashiers.set(i, dbCashier);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) cashiers.add(dbCashier);
+            if (this.currentOrder != null) {
+                this.currentOrder.setCashier(dbCashier);
+            }
+            return String.format(
+                "{\"success\":true,\"cashier\":{\"id\":\"%s\",\"name\":\"%s\",\"shift\":\"%s\"}}",
+                escapeJson(dbCashier.getIdKasir()), escapeJson(dbCashier.getNamaKasir()), escapeJson(dbCashier.getShift())
+            );
+        }
+
+        // Fallback: cek di list memori (mode offline / DB tidak tersedia)
         for (Cashier c : cashiers) {
             if (c.getNamaKasir().equalsIgnoreCase(cashierName.trim())) {
                 if (c.login(password)) {
@@ -430,50 +445,20 @@ public class JavaBridge {
                 return "{\"success\":false,\"message\":\"ID Menu sudah digunakan!\"}";
             }
         }
-        
+
         String tipe = category.equalsIgnoreCase("ramen") ? "ramen" : "general";
         Menu newMenu;
         if (tipe.equals("ramen")) {
             newMenu = new RamenMenu(id, name, price, category, 0, "Sedang", "Chashu, Tamago, Nori", "Chashu · Tamago · Nori");
         } else {
             boolean isCold = category.equalsIgnoreCase("minuman");
-            String detail = category.equalsIgnoreCase("minuman") ? "Less sugar available" : "Japanese snack";
+            String detail  = category.equalsIgnoreCase("minuman") ? "Less sugar available" : "Japanese snack";
             newMenu = new GeneralMenu(id, name, price, category, isCold, detail);
         }
-        
+
         menus.add(newMenu);
-        
-        try {
-            java.sql.Connection conn = com.muragame.pos.database.DatabaseConnection.getInstance().getConnection();
-            if (conn != null) {
-                String sql = "INSERT INTO menu (id_menu, nama_menu, harga, kategori, tipe_menu, tingkat_kepedasan, tekstur_mi, topping_tambahan, is_cold, detail_khusus) " +
-                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, id);
-                    ps.setString(2, name);
-                    ps.setDouble(3, price);
-                    ps.setString(4, category.toLowerCase());
-                    ps.setString(5, tipe);
-                    if (tipe.equals("ramen")) {
-                        ps.setInt(6, 0);
-                        ps.setString(7, "Sedang");
-                        ps.setString(8, "Chashu, Tamago, Nori");
-                        ps.setNull(9, java.sql.Types.BOOLEAN);
-                        ps.setString(10, "Chashu · Tamago · Nori");
-                    } else {
-                        ps.setNull(6, java.sql.Types.INTEGER);
-                        ps.setNull(7, java.sql.Types.VARCHAR);
-                        ps.setNull(8, java.sql.Types.VARCHAR);
-                        ps.setBoolean(9, category.equalsIgnoreCase("minuman"));
-                        ps.setString(10, category.equalsIgnoreCase("minuman") ? "Less sugar available" : "Japanese snack");
-                    }
-                    ps.executeUpdate();
-                }
-            }
-        } catch (java.sql.SQLException e) {
-            System.err.println("[DB] Gagal menyimpan menu baru ke DB: " + e.getMessage());
-        }
-        
+        menuRepository.saveMenu(newMenu);
+
         return "{\"success\":true}";
     }
 
@@ -488,27 +473,12 @@ public class JavaBridge {
         if (target == null) {
             return "{\"success\":false,\"message\":\"Menu tidak ditemukan!\"}";
         }
-        
+
         target.setNamaMenu(name);
         target.setHarga(price);
         target.setKategori(category);
-        
-        try {
-            java.sql.Connection conn = com.muragame.pos.database.DatabaseConnection.getInstance().getConnection();
-            if (conn != null) {
-                String sql = "UPDATE menu SET nama_menu = ?, harga = ?, kategori = ? WHERE id_menu = ?";
-                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, name);
-                    ps.setDouble(2, price);
-                    ps.setString(3, category.toLowerCase());
-                    ps.setString(4, id);
-                    ps.executeUpdate();
-                }
-            }
-        } catch (java.sql.SQLException e) {
-            System.err.println("[DB] Gagal mengupdate menu di DB: " + e.getMessage());
-        }
-        
+        menuRepository.updateMenu(target);
+
         return "{\"success\":true}";
     }
 
@@ -523,22 +493,12 @@ public class JavaBridge {
         if (target == null) {
             return "{\"success\":false,\"message\":\"Menu tidak ditemukan!\"}";
         }
-        
-        try {
-            java.sql.Connection conn = com.muragame.pos.database.DatabaseConnection.getInstance().getConnection();
-            if (conn != null) {
-                String sql = "DELETE FROM menu WHERE id_menu = ?";
-                try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, id);
-                    ps.executeUpdate();
-                }
-            }
-            menus.remove(target);
-        } catch (java.sql.SQLException e) {
-            System.err.println("[DB] Gagal menghapus menu dari DB: " + e.getMessage());
+
+        boolean dbDeleted = menuRepository.deleteMenu(id);
+        if (!dbDeleted) {
             return "{\"success\":false,\"message\":\"Tidak dapat menghapus menu karena menu ini sudah memiliki riwayat transaksi.\"}";
         }
-        
+        menus.remove(target);
         return "{\"success\":true}";
     }
 

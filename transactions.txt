@@ -159,3 +159,39 @@ Kembalian  : Rp          0
 Status     : LUNAS
 ==========================================
 
+==========================================
+TRANSAKSI: ORD-20260626-314
+Waktu    : 2026-06-26 07:15:48
+Kasir    : Ahmad Kasir (Pagi)
+Pelanggan: Umum (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Shio Tori Ramen      x1    Rp     38.000
+------------------------------------------
+Subtotal   : Rp     38.000
+Diskon     : Rp          0
+Total      : Rp     38.000
+Metode     : CASH
+Dibayar    : Rp     38.000
+Kembalian  : Rp          0
+Status     : LUNAS
+==========================================
+
+==========================================
+TRANSAKSI: ORD-20260626-254
+Waktu    : 2026-06-26 07:23:11
+Kasir    : Ahmad Kasir (Pagi)
+Pelanggan: Umum (Regular)
+Layanan  : Dine In (Rp 0.0)
+------------------------------------------
+Shio Tori Ramen      x1    Rp     38.000
+------------------------------------------
+Subtotal   : Rp     38.000
+Diskon     : Rp          0
+Total      : Rp     38.000
+Metode     : CASH
+Dibayar    : Rp     38.000
+Kembalian  : Rp          0
+Status     : LUNAS
+==========================================
+
